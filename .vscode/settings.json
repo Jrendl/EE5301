@@ -1,0 +1,15 @@
+{
+    // Set up clang-format as VSCode's formatter.
+    "C_Cpp.formatting": "clangFormat",
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "ms-vscode.cpptools",
+    "files.associations": {
+      "boardinteract.h": "c",
+      "cstdlib": "cpp",
+      "limits": "cpp",
+      "*.tcc": "cpp",
+      "iosfwd": "cpp",
+      "vector": "cpp",
+      "ostream": "cpp"
+    }
+}
