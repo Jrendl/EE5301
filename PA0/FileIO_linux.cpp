@@ -15,6 +15,9 @@ constexpr int MAX_NUM_GATES = 100;
 struct gate_t
 {
 	string name = "";
+	//true for delay table
+	//false for skew table
+	bool table_indicator = true;
 	double capacitance = 0.0;
 	double cell_delay[7][7] = {0.0};
 	double output_slew[7][7] = {0.0};
@@ -70,7 +73,9 @@ int parseFileCppFormat(char *fName)
 	delimiters['\"'] |= ctype_base::space;
 	delimiters[';'] |= ctype_base::space;
 	delimiters[':'] |= ctype_base::space;
-	int gate_number = 0;
+	int gate_number = 0; //iterator between gates
+	int delay_table = 0; //iterator between rows of the delay table
+	int output_slew = 0; //iterator between rows of the output slew table
 	while (ifs.good())
 	{
 		ifs.getline(lineBuf, 1023); // read one line
@@ -83,6 +88,7 @@ int parseFileCppFormat(char *fName)
 
 		string firstWord;
 		iss >> firstWord;
+		cout << "first word:" << firstWord<< endl;
 		if (firstWord.find("cell") != string::npos)
 		{ // found the word cell
 
@@ -105,14 +111,65 @@ int parseFileCppFormat(char *fName)
 			string cap;
 			iss >> cap;
 			cout << "capacitance =" << cap << endl;
-			gate_list[gate_number].capacitance = atof(cap.c_str());
-
-			// move this
-			gate_number++;
+			gate_list[gate_number].capacitance = stod(cap);
 		}
 		else if (firstWord.compare("values") == 0)
 		{
-			string value;
+			if (gate_list[gate_number].table_indicator)
+			{ //we are in the delay_table
+				//take the first row of the table
+				string val;
+				for (int i = 0; i < 7; i++)
+				{
+					iss >> val;
+					cout << "delay table value: " << val << endl;
+					gate_list[gate_number].cell_delay[delay_table][i] = stod(val);
+				}
+				delay_table++;
+			}else{ //in the output slew table
+				//take the first row of the table
+				string val;
+				for (int i = 0; i < 7; i++)
+				{
+					iss >> val;
+					cout << "output slew value: " << val << endl;
+					gate_list[gate_number].output_slew[output_slew][i] = stod(val);
+				}
+				output_slew++;
+			}
+		}else if(firstWord.find("0.") != string::npos){
+			if (gate_list[gate_number].table_indicator)
+			{ //we are in the delay_table
+				gate_list[gate_number].cell_delay[delay_table][0] = stod(firstWord);
+				string val;
+				for (int i = 1; i < 7; i++)
+				{
+					iss >> val;
+					cout << "delay table value: " << val << endl;
+					gate_list[gate_number].cell_delay[delay_table][i] = stod(val);
+				}
+				delay_table++;
+				//check if we've fully populated the delay table
+				if (delay_table >= 7){
+					delay_table = 0;
+					gate_list[gate_number].table_indicator = false;
+				}
+			}else{ //in the output slew table
+				gate_list[gate_number].output_slew[output_slew][0] = stod(firstWord);
+				string val;
+				for (int i = 1; i < 7; i++)
+				{
+					iss >> val;
+					cout << "output slew value: " << val << endl;
+					gate_list[gate_number].output_slew[output_slew][i] = stod(val);
+				}
+				output_slew++;
+				//check if we've fully populated the output slew table
+				if (output_slew >= 7){
+					output_slew = 0;
+					gate_number++; //we're done with this gate
+				}
+			}
 		}
 	}
 
