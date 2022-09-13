@@ -15,8 +15,8 @@ constexpr int MAX_NUM_GATES = 100;
 struct gate_t
 {
 	string name = "";
-	//true for delay table
-	//false for skew table
+	// true for delay table
+	// false for skew table
 	bool table_indicator = true;
 	double capacitance = 0.0;
 	double cell_delay[7][7] = {0.0};
@@ -26,6 +26,7 @@ struct gate_t
 // returns the next character in file without actually reading it (i.e., going past it)
 int fpeek(FILE *stream);
 int parseFileCppFormat(char *fName);
+int outputFile(int gate_number);
 
 gate_t gate_list[MAX_NUM_GATES]; // Global for now for ease of programming.
 
@@ -37,7 +38,12 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 
-	parseFileCppFormat(argv[1]);
+	int gate_count = parseFileCppFormat(argv[1]);
+	if (gate_count == -1)
+	{
+		return -1;
+	}
+	outputFile(gate_count);
 	return 0;
 }
 
@@ -73,9 +79,9 @@ int parseFileCppFormat(char *fName)
 	delimiters['\"'] |= ctype_base::space;
 	delimiters[';'] |= ctype_base::space;
 	delimiters[':'] |= ctype_base::space;
-	int gate_number = 0; //iterator between gates
-	int delay_table = 0; //iterator between rows of the delay table
-	int output_slew = 0; //iterator between rows of the output slew table
+	int gate_number = 0; // iterator between gates
+	int delay_table = 0; // iterator between rows of the delay table
+	int output_slew = 0; // iterator between rows of the output slew table
 	while (ifs.good())
 	{
 		ifs.getline(lineBuf, 1023); // read one line
@@ -88,7 +94,7 @@ int parseFileCppFormat(char *fName)
 
 		string firstWord;
 		iss >> firstWord;
-		cout << "first word:" << firstWord<< endl;
+		cout << "first word:" << firstWord << endl;
 		if (firstWord.find("cell") != string::npos)
 		{ // found the word cell
 
@@ -116,8 +122,8 @@ int parseFileCppFormat(char *fName)
 		else if (firstWord.compare("values") == 0)
 		{
 			if (gate_list[gate_number].table_indicator)
-			{ //we are in the delay_table
-				//take the first row of the table
+			{ // we are in the delay_table
+				// take the first row of the table
 				string val;
 				for (int i = 0; i < 7; i++)
 				{
@@ -126,8 +132,10 @@ int parseFileCppFormat(char *fName)
 					gate_list[gate_number].cell_delay[delay_table][i] = stod(val);
 				}
 				delay_table++;
-			}else{ //in the output slew table
-				//take the first row of the table
+			}
+			else
+			{ // in the output slew table
+				// take the first row of the table
 				string val;
 				for (int i = 0; i < 7; i++)
 				{
@@ -137,9 +145,11 @@ int parseFileCppFormat(char *fName)
 				}
 				output_slew++;
 			}
-		}else if(firstWord.find("0.") != string::npos){
+		}
+		else if (firstWord.find("0.") != string::npos)
+		{
 			if (gate_list[gate_number].table_indicator)
-			{ //we are in the delay_table
+			{ // we are in the delay_table
 				gate_list[gate_number].cell_delay[delay_table][0] = stod(firstWord);
 				string val;
 				for (int i = 1; i < 7; i++)
@@ -149,12 +159,15 @@ int parseFileCppFormat(char *fName)
 					gate_list[gate_number].cell_delay[delay_table][i] = stod(val);
 				}
 				delay_table++;
-				//check if we've fully populated the delay table
-				if (delay_table >= 7){
+				// check if we've fully populated the delay table
+				if (delay_table >= 7)
+				{
 					delay_table = 0;
 					gate_list[gate_number].table_indicator = false;
 				}
-			}else{ //in the output slew table
+			}
+			else
+			{ // in the output slew table
 				gate_list[gate_number].output_slew[output_slew][0] = stod(firstWord);
 				string val;
 				for (int i = 1; i < 7; i++)
@@ -164,14 +177,47 @@ int parseFileCppFormat(char *fName)
 					gate_list[gate_number].output_slew[output_slew][i] = stod(val);
 				}
 				output_slew++;
-				//check if we've fully populated the output slew table
-				if (output_slew >= 7){
+				// check if we've fully populated the output slew table
+				if (output_slew >= 7)
+				{
 					output_slew = 0;
-					gate_number++; //we're done with this gate
+					gate_number++; // we're done with this gate
 				}
 			}
 		}
 	}
 
+	ifs.close();
+	return gate_number;
+}
+
+int outputFile(int gate_number)
+{
+	char lineBuf[1024];
+	cout << "outputing to file rendl008.txt" << endl;
+	ofstream ofs("rendl008.txt");
+	if (ofs.is_open() == 0)
+	{ // or we could say if (!ifs)
+		cout << "Error opening file rendl008.txt" << endl;
+		return -1;
+	}
+
+	ofs << "Number of Cells: " << gate_number << endl;
+
+	for (int i = 0; i < gate_number; i++)
+	{
+		gate_t temp = gate_list[i];
+		ofs << temp.name << endl;
+
+		for (int j = 0; j < 7; j++)
+		{
+			for (int k = 0; k < 7; k++)
+			{
+				ofs << temp.cell_delay[j][k] << " ";
+			}
+			ofs << endl;
+		}
+	}
+	ofs.close();
 	return 0;
 }
