@@ -122,16 +122,17 @@ int parseFileCppFormat(char *fName)
 			continue;
 
 		istringstream iss(lineStr);
+		// apply delimiters to stream
 		iss.imbue(locale(iss.getloc(), new ctype<char>(delimiters.data())));
 
 		string firstWord;
 		iss >> firstWord;
-		cout << "first word:" << firstWord << endl;
-		if (firstWord.find("cell") != string::npos)
-		{ // found the word cell
+		if (firstWord.find("cell") != string::npos) // found the word cell
+		{
 
 			string cellName;
-			iss >> cellName;
+			iss >> cellName; // read the next work in the line
+			// in this case, it is not a cell name
 			if (cellName.find("Timing") != string::npos)
 			{
 				continue;
@@ -139,14 +140,14 @@ int parseFileCppFormat(char *fName)
 			cout << "Found Cell " << cellName << endl;
 			gate_list[gate_number].name = cellName;
 		}
-		else if (firstWord.compare("capacitance") == 0)
+		else if (firstWord.compare("capacitance") == 0) // the first word is exactly capacitance, we have found that cells capacitance
 		{
 			string cap;
 			iss >> cap;
 			cout << "capacitance =" << cap << endl;
 			gate_list[gate_number].capacitance = stod(cap);
 		}
-		else if (firstWord.compare("values") == 0)
+		else if (firstWord.compare("values") == 0) // this is either the first line of the delay or skew table
 		{
 			if (gate_list[gate_number].table_indicator)
 			{ // we are in the delay_table
@@ -173,7 +174,7 @@ int parseFileCppFormat(char *fName)
 				output_slew++;
 			}
 		}
-		else if (firstWord.find("0.") != string::npos)
+		else if (firstWord.find("0.") != string::npos) // all other rows of either table
 		{
 			if (gate_list[gate_number].table_indicator)
 			{ // we are in the delay_table
@@ -190,7 +191,7 @@ int parseFileCppFormat(char *fName)
 				if (delay_table >= 7)
 				{
 					delay_table = 0;
-					gate_list[gate_number].table_indicator = false;
+					gate_list[gate_number].table_indicator = false; // move onto the slew table
 				}
 			}
 			else
