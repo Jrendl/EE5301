@@ -12,6 +12,16 @@
 using namespace std;
 
 constexpr int MAX_NUM_GATES = 100;
+/**
+ * @brief gate type definition
+ * name: the type of gate implemented
+ * table_indicator: variable used for parsing file.
+ * True if we're parsing the delay table, false if parsing the output slew
+ * capacitance: internal capacitance of the gate
+ * cell_delay: 7x7 delay table
+ * output_slew: 7x7 output slew rate table
+ *
+ */
 struct gate_t
 {
 	string name = "";
@@ -23,12 +33,34 @@ struct gate_t
 	double output_slew[7][7] = {0.0};
 };
 
-// returns the next character in file without actually reading it (i.e., going past it)
+/**
+ * @brief returns the next character in a file without actually reading it
+ *
+ * @param stream - file stream
+ * @return int
+ */
 int fpeek(FILE *stream);
+/**
+ * @brief parse input file with gate information
+ *
+ * @param fName - relative file path
+ * @return int - -1 if failed to open, number of gates otherwise
+ */
 int parseFileCppFormat(char *fName);
+/**
+ * @brief output formated gate delay tables to rendl008.txt
+ *
+ * @param gate_number - number of total gates to export
+ * @return int - -1 if failed to open, 0 if success
+ */
 int outputFile(int gate_number);
 
-gate_t gate_list[MAX_NUM_GATES]; // Global for now for ease of programming.
+/**
+ * @brief global array of gates
+ * size of MAX_NUM_GATES
+ *
+ */
+gate_t gate_list[MAX_NUM_GATES];
 
 int main(int argc, char *argv[])
 {
@@ -106,11 +138,6 @@ int parseFileCppFormat(char *fName)
 			}
 			cout << "Found Cell " << cellName << endl;
 			gate_list[gate_number].name = cellName;
-			// want to get rid of the ')' at the end of the cell name?
-			// You can get rid of the last character, but a cooler and probably much more useful technique is to
-			// define your delimiter to be space and ')'.
-			// This would be useful when later we want to get rid of " and , as well to get the 7x7 delay table.
-			// See this post and the solution https://stackoverflow.com/questions/7302996/changing-the-delimiter-for-cin-c
 		}
 		else if (firstWord.compare("capacitance") == 0)
 		{
