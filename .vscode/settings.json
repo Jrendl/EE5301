@@ -10,6 +10,10 @@
       "*.tcc": "cpp",
       "iosfwd": "cpp",
       "vector": "cpp",
-      "ostream": "cpp"
+      "ostream": "cpp",
+      "deque": "cpp",
+      "list": "cpp",
+      "string": "cpp",
+      "unordered_map": "cpp"
     }
 }
