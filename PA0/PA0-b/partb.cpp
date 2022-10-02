@@ -15,9 +15,6 @@
 
 using namespace std;
 
-// TODO: add map for gate number to struct
-// TODO: add vector of lists for adjacency table
-// TODO: parse Circuit file
 // TODO: output for gate numbers
 
 constexpr int MAX_NUM_GATES = 100;
@@ -53,7 +50,7 @@ struct delimiters : std::ctype<char> {
         rc[':'] = std::ctype_base::space;
         rc['\"'] = std::ctype_base::space;
         rc[';'] = std::ctype_base::space;
-        rc['\r'] = std::ctype_base::space;
+        // rc['\r'] = std::ctype_base::space;
         return &rc[0];
     }
 };
@@ -260,7 +257,8 @@ int parse_circuit_file(char *fName) {
         string currentWord;
         iss >> currentWord;
 
-        if (currentWord.compare("#") == 0 || currentWord.compare("") == 0) {
+        if (currentWord.compare("#") == 0 || currentWord.compare("\r") == 0 ||
+            currentWord.compare("#\r") == 0) {
             continue;  // this line is a comment
         } else if (currentWord.compare("INPUT") == 0) {
             iss >> currentWord;
@@ -268,7 +266,7 @@ int parse_circuit_file(char *fName) {
             check_resize(gate_num);
             // list set to -1 if input node
             std::list<int> temp = {-1};
-            adj_list.insert(adj_list.begin() + gate_num, temp);
+            adj_list[gate_num] = temp;
         } else if (currentWord.compare("OUTPUT") == 0) {
             continue;  // not currently tracking outputs of nodes
         } else {
@@ -293,17 +291,18 @@ int parse_circuit_file(char *fName) {
             }
 
             // build adjacency list
-            std::list<int> temp;
+            std::list<int> temp = *(new std::list<int>);
 
-            while (iss.good()) {
+            while (iss) {
                 iss >> currentWord;
-                if (currentWord.compare("#") == 0) {
+                if (currentWord.compare("#") == 0 ||
+                    currentWord.find('\r') != string::npos) {
                     break;
                 }
                 temp.push_back(stoi(currentWord));
             }
 
-            adj_list.insert(adj_list.begin() + gate_num, temp);
+            adj_list[gate_num] = temp;
         }
     }
     return 0;
