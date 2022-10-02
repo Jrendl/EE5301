@@ -1,6 +1,3 @@
-// FileIO.cpp : Defines the entry point for the console application.
-//
-
 #include <stdio.h>  // needed to open files in C
 #include <string.h>
 
@@ -14,8 +11,6 @@
 #include <vector>
 
 using namespace std;
-
-// TODO: output for gate numbers
 
 constexpr int MAX_NUM_GATES = 100;
 /**
@@ -36,6 +31,10 @@ struct gate_t {
     double output_slew[7][7] = {0.0};
 };
 
+/**
+ * @brief delimiter override to allow imbue of iss
+ *
+ */
 struct delimiters : std::ctype<char> {
     delimiters() : std::ctype<char>(get_table()) {
     }
@@ -50,7 +49,6 @@ struct delimiters : std::ctype<char> {
         rc[':'] = std::ctype_base::space;
         rc['\"'] = std::ctype_base::space;
         rc[';'] = std::ctype_base::space;
-        // rc['\r'] = std::ctype_base::space;
         return &rc[0];
     }
 };
@@ -62,6 +60,7 @@ struct delimiters : std::ctype<char> {
  * @return int
  */
 int fpeek(FILE *stream);
+
 /**
  * @brief parse input file with gate information
  *
@@ -70,9 +69,38 @@ int fpeek(FILE *stream);
  */
 int parse_gate_library(char *fName);
 
+/**
+ * @brief parses circuit definition file and stores relevant data in adj_list
+ * and gate_type_map
+ *
+ * @param fName - file path
+ * @return int - -1 if failed, 0 if success
+ */
 int parse_circuit_file(char *fName);
 
+/**
+ * @brief output gate information in following format
+ * <GATE NUMBER> <GATE TYPE> <FIRST INPUT> <LAST INPUT> <THIRD ROW, SECOND
+ * COLUMN OF SLEW TABLE>
+ *
+ * @param gate_num - the gate to gather information for
+ */
+void output_gate_info(int gate_num);
+
+/**
+ * @brief find corresponding location of gate type definition in library
+ *
+ * @param gate_name - gate_type name
+ * @return int - address of gate_type in gate_lib
+ */
 int find_gate_lib(string gate_name);
+
+/**
+ * @brief check if adj_list needs to be resized
+ * if gate_num >= size of adj_list, expand adj_list
+ *
+ * @param gate_num
+ */
 void check_resize(int gate_num);
 
 /**
@@ -81,9 +109,25 @@ void check_resize(int gate_num);
  *
  */
 gate_t gate_lib[MAX_NUM_GATES];
+
+/**
+ * @brief number of gates in library
+ *
+ */
 int gate_count;
 
+/**
+ * @brief adjacency list for circuit file
+ *
+ * stored as a vector of lists
+ *
+ */
 std::vector<std::list<int>> adj_list;
+
+/**
+ * @brief maps gate number to gate type library definiton
+ *
+ */
 std::map<int, gate_t *> gate_type_map;
 
 int main(int argc, char *argv[]) {
@@ -106,6 +150,11 @@ int main(int argc, char *argv[]) {
     parse_circuit_file(argv[2]);
 
     // Output node info
+    cout << "outputing node info" << endl;
+
+    for (int i = 3; i < argc; i++) {
+        output_gate_info(atoi(argv[i]));
+    }
     // outputFile(gate_count);
     return 0;
 }
@@ -267,8 +316,13 @@ int parse_circuit_file(char *fName) {
             // list set to -1 if input node
             std::list<int> temp = {-1};
             adj_list[gate_num] = temp;
+
+            // fille type map
+            gate_type_map.insert(
+                std::pair<int, gate_t *>(gate_num, new gate_t));
+            gate_type_map[gate_num]->name = "Input Pad";
         } else if (currentWord.compare("OUTPUT") == 0) {
-            continue;  // not currently tracking outputs of nodes
+            continue;
         } else {
             // any other line would begin with a number
             int gate_num = stoi(currentWord);
@@ -306,6 +360,13 @@ int parse_circuit_file(char *fName) {
         }
     }
     return 0;
+}
+
+void output_gate_info(int gate_num) {
+    // assuming that the node numbers inputed actually exist
+    cout << gate_num << "\t" << gate_type_map.at(gate_num)->name << "\t"
+         << adj_list[gate_num].front() << "\t" << adj_list[gate_num].back()
+         << "\t" << gate_type_map[gate_num]->output_slew[2][1] << endl;
 }
 
 int find_gate_lib(string gate_name) {
