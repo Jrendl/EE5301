@@ -11,3 +11,4 @@ within the gate
 * The load capacitance of the final stage of gates (which are simply connected to the primary outputs) is equal to four times the capacitance of an inverter from the liberty file.  
 * The required arrival time is 1.1 times the total circuit delay, and is the same at each primary output of the circuit.
 
+

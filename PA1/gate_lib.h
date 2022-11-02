@@ -37,6 +37,10 @@ class gate_lib {
    private:
     int gate_count;
 
+    /**
+     * @brief delimiter override to allow imbue of iss
+     *
+     */
     struct delimiters : std::ctype<char> {
         delimiters() : std::ctype<char>(get_table()) {
         }
@@ -51,7 +55,6 @@ class gate_lib {
             rc[':'] = std::ctype_base::space;
             rc['\"'] = std::ctype_base::space;
             rc[';'] = std::ctype_base::space;
-            rc['\r'] = std::ctype_base::space;
             return &rc[0];
         }
     };

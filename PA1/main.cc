@@ -27,7 +27,8 @@ int main(int argc, char *argv[]) {
     }
 
     gate_lib library = gate_lib();
-    circuit_parser parser = circuit_parser(&library);
+    // initially assume 1000 gates
+    circuit_parser parser = circuit_parser(&library, 1000);
 
     // parse Library File
     library.parse_gate_library(argv[1]);
@@ -37,7 +38,6 @@ int main(int argc, char *argv[]) {
 
     // parse circuit File
 
-    parser.adj_list.resize(1000);  // initial assumption of 1000 gates
     parser.parse_circuit_file(argv[2]);
 
     // calculate Static timing

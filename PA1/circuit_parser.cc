@@ -15,25 +15,37 @@ int circuit_parser::parse_circuit_file(char *fName) {
         if (lineStr.empty())         // is empty line?
             continue;
 
+        // debug
+        cout << lineStr << endl;
+
         transform(lineStr.begin(), lineStr.end(), lineStr.begin(), ::toupper);
         istringstream iss(lineStr);
         // apply delimiters to stream
         iss.imbue(locale(cin.getloc(), new delimiters));
 
         string currentWord;
+        cout << currentWord << endl;
         iss >> currentWord;
 
-        if (currentWord.compare("#") == 0 || currentWord.compare("") == 0) {
-            continue;  // this line is a comment
+        if (currentWord.find("#") != string::npos ||
+            currentWord.compare("\r") == 0 || currentWord.compare("#\r") == 0) {
+            continue;
         } else if (currentWord.compare("INPUT") == 0) {
             iss >> currentWord;
             int gate_num = stoi(currentWord);
             check_resize(gate_num);
             // list set to -1 if input node
             std::list<int> temp = {-1};
-            adj_list.insert(adj_list.begin() + gate_num, temp);
+            fanin_list[gate_num] = temp;
+            ;
         } else if (currentWord.compare("OUTPUT") == 0) {
-            continue;  // not currently tracking outputs of nodes
+            iss >> currentWord;
+            int gate_num = stoi(currentWord);
+            check_resize(gate_num);
+            // list set to -1 if input node
+            std::list<int> temp = {-1};
+            fanout_list[gate_num] = temp;
+            ;
         } else {
             // any other line would begin with a number
             int gate_num = stoi(currentWord);
@@ -55,27 +67,44 @@ int circuit_parser::parse_circuit_file(char *fName) {
                     gate_num, &(library->gate_lib_array[gate_lib_loc])));
             }
 
-            // build adjacency list
-            std::list<int> temp = *(new std::list<int>);
+            // build fanin list
+            std::list<int> temp = *(new std::list<int>());
 
-            while (iss.good()) {
+            while (iss) {
                 iss >> currentWord;
-                if (currentWord.compare("#") == 0) {
+                if (currentWord.compare("#") == 0 ||
+                    currentWord.find('\r') != string::npos) {
                     break;
                 }
-                temp.push_back(stoi(currentWord));
+                int node = stoi(currentWord);
+                temp.push_back(node);
+                // add node to fanout list
+                fanout_list[node].push_back(gate_num);
             }
 
-            adj_list.insert(adj_list.begin() + gate_num, temp);
+            fanin_list[gate_num] = temp;
+            ;
         }
     }
     return 0;
 }
 
 void circuit_parser::check_resize(int gate_num) {
-    if (gate_num >= adj_list.size()) {
+    if (gate_num >= fanin_list.size()) {
         // increment size to 1000 greater than order of number
-        adj_list.resize(((gate_num / 1000) + 1) * 1000);
         // integer division truncates
+        int old_size = fanout_list.size();
+        int new_size = ((gate_num / 1000) + 1) * 1000;
+
+        fanin_list.resize(new_size);
+        fanout_list.resize(new_size);
+
+        prep_fanout(old_size, new_size);
+    }
+}
+
+void circuit_parser::prep_fanout(int start, int end) {
+    for (int i = start; i < end; i++) {
+        fanout_list[i] = *(new std::list<int>());
     }
 }
