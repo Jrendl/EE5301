@@ -6,13 +6,13 @@ CFLAGS = -Wall -g
 # ****************************************************
 # Targets needed to bring the executable up to date
  
-partb: partb.o gate_lib.o circuit_parser.o
-	$(CC) $(CFLAGS) -o partb partb.o gate_lib.o circuit_parser.o
+main: main.o gate_lib.o circuit_parser.o
+	$(CC) $(CFLAGS) -o main main.o gate_lib.o circuit_parser.o
  
 # The main.o target can be written more simply
  
-partb.o: partb.cc gate_lib.h circuit_parser.h
-	$(CC) $(CFLAGS) -c partb.cc
+main.o: main.cc gate_lib.h circuit_parser.h
+	$(CC) $(CFLAGS) -c main.cc
  
 gate_lib.o: gate_lib.h
  

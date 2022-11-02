@@ -40,7 +40,10 @@ int main(int argc, char *argv[]) {
     parser.adj_list.resize(1000);  // initial assumption of 1000 gates
     parser.parse_circuit_file(argv[2]);
 
-    // Output node info
-    // outputFile(gate_count);
+    // calculate Static timing
+    // forward pass to determine cell delays
+    // reverse pass to determine slack
+
+    // output to file
     return 0;
 }

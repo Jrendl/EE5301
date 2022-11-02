@@ -15,5 +15,7 @@
       "list": "cpp",
       "string": "cpp",
       "unordered_map": "cpp"
-    }
+    },
+    "synthwave84.brightness": 0.25
+
 }
