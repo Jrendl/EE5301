@@ -86,5 +86,11 @@ class gate_lib {
      */
     gate_t gate_lib_array[MAX_NUM_GATES];
 
+    /**
+     * @brief maps gate number to gate type library definiton
+     *
+     */
+    std::map<int, gate_t *> gate_type_map;
+
     int get_gate_count(void);
 };

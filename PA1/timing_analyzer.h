@@ -20,6 +20,8 @@ class timing_analyzer {
     gate_lib* lib;
     int forward_traverse(void);
     int backward_traverse(void);
+    // pair (slew rate, arrival time)
+    std::vector<std::pair<double, double>> arrival_times;
 
    public:
     timing_analyzer(circuit_parser* parser, gate_lib* lib)
