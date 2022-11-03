@@ -18,14 +18,21 @@ class timing_analyzer {
    private:
     circuit_parser* parser;
     gate_lib* lib;
-    int forward_traverse(void);
-    int backward_traverse(void);
-    // pair (slew rate, arrival time)
-    std::vector<std::pair<float, float>> arrival_times;
+    float latest_arrival;
+    void forward_traverse(void);
+    void backward_traverse(void);
+    // pair (slew rate, arrival time, cell delay)
+    std::vector<std::tuple<float, float, float>> arrival_times;
+    std::vector<float> required_times;
+    std::vector<float> slack;
 
    public:
     timing_analyzer(circuit_parser* parser, gate_lib* lib)
         : parser(parser), lib(lib) {
+        arrival_times.resize(parser->fanin_list.size());
+        required_times.resize(parser->fanin_list.size());
+        slack.resize(parser->fanin_list.size());
+        latest_arrival = 0;
     }
     int analyze(char* outFile);
 };

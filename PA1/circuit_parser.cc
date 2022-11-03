@@ -43,7 +43,7 @@ int circuit_parser::parse_circuit_file(char *fName) {
             int gate_num = stoi(currentWord);
             check_resize(gate_num);
             // list set to -1 if input node
-            std::list<int> temp = {-1};
+            std::list<int> temp = {-2};
             fanout_list[gate_num] = temp;
             ;
         } else {

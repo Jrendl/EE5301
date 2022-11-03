@@ -43,7 +43,8 @@
       "type_traits": "cpp",
       "tuple": "cpp",
       "typeinfo": "cpp",
-      "utility": "cpp"
+      "utility": "cpp",
+      "optional": "cpp"
     },
     "synthwave84.brightness": 0.25
 

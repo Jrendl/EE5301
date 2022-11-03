@@ -1,6 +1,6 @@
 #include "gate_lib.h"
 
-int gate_lib::parse_gate_library(char *fName) {
+int gate_lib::parse_gate_library(char* fName) {
     char lineBuf[1024];
     cout << "Parsing input file " << fName << " using C++ syntax." << endl;
     ifstream ifs(fName);
@@ -41,6 +41,19 @@ int gate_lib::parse_gate_library(char *fName) {
             iss >> cap;
             cout << "capacitance =" << cap << endl;
             gate_lib_array[gate_count].capacitance = stod(cap);
+        } else if (firstWord.compare("index_1") == 0) {
+            string val;
+            for (int i = 0; i < 7; i++) {
+                iss >> val;
+                gate_lib_array[gate_count].index_1[i] = stof(val);
+            }
+
+        } else if (firstWord.compare("index_2") == 0) {
+            string val;
+            for (int i = 0; i < 7; i++) {
+                iss >> val;
+                gate_lib_array[gate_count].index_2[i] = stof(val);
+            }
         } else if (firstWord.compare("values") ==
                    0)  // this is either the first line of the delay or skew
                        // table
@@ -123,4 +136,20 @@ int gate_lib::find_gate_lib(string gate_name) {
 
 int gate_lib::get_gate_count() {
     return gate_count;
+}
+
+int gate_lib::find_index_1(float value, gate_t* gate) {
+    for (int i = 0; i < 7; i++) {
+        if (gate->index_1[i] == value) {
+            return i;
+        }
+    }
+}
+
+int gate_lib::find_index_2(float value, gate_t* gate) {
+    for (int i = 0; i < 7; i++) {
+        if (gate->index_2[i] == value) {
+            return i;
+        }
+    }
 }
