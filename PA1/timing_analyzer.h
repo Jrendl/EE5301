@@ -21,6 +21,7 @@ class timing_analyzer {
     float latest_arrival;
     void forward_traverse(void);
     void backward_traverse(void);
+    int output(const char* outFile);
     // pair (slew rate, arrival time, cell delay)
     std::vector<std::tuple<float, float, float>> arrival_times;
     std::vector<float> required_times;
@@ -34,5 +35,5 @@ class timing_analyzer {
         slack.resize(parser->fanin_list.size());
         latest_arrival = 0;
     }
-    int analyze(char* outFile);
+    int analyze(const char* outFile);
 };

@@ -31,21 +31,28 @@ int circuit_parser::parse_circuit_file(char *fName) {
             currentWord.compare("\r") == 0 || currentWord.compare("#\r") == 0) {
             continue;
         } else if (currentWord.compare("INPUT") == 0) {
+            int gate_lib_loc = library->find_gate_lib("INP");
             iss >> currentWord;
             int gate_num = stoi(currentWord);
             check_resize(gate_num);
             // list set to -1 if input node
             std::list<int> temp = {-1};
             fanin_list[gate_num] = temp;
-            ;
+            gate_type_map.insert(std::pair<int, gate_t *>(
+                gate_num, &(library->gate_lib_array[gate_lib_loc])));
+
         } else if (currentWord.compare("OUTPUT") == 0) {
+            // find the output gate
+            int gate_lib_loc = library->find_gate_lib(currentWord);
             iss >> currentWord;
             int gate_num = stoi(currentWord);
             check_resize(gate_num);
             // list set to -1 if input node
             std::list<int> temp = {-2};
             fanout_list[gate_num] = temp;
-            ;
+            gate_type_map.insert(std::pair<int, gate_t *>(
+                gate_num, &(library->gate_lib_array[gate_lib_loc])));
+
         } else {
             // any other line would begin with a number
             int gate_num = stoi(currentWord);
@@ -83,7 +90,6 @@ int circuit_parser::parse_circuit_file(char *fName) {
             }
 
             fanin_list[gate_num] = temp;
-            ;
         }
     }
     return 0;

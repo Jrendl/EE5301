@@ -27,8 +27,8 @@ struct gate_t {
     string name = "";
     bool table_indicator = true;
     double capacitance = 0.0;
-    float index_1[7] = {0.0};
-    float index_2[7] = {0.0};
+    float input_slew_vals[7] = {0.0};
+    float load_cap_vals[7] = {0.0};
     double cell_delay[7][7] = {0.0};
     double output_slew[7][7] = {0.0};
 };
@@ -95,6 +95,6 @@ class gate_lib {
     std::map<int, gate_t *> gate_type_map;
 
     int get_gate_count(void);
-    int find_index_1(float value, gate_t* gate);
-    int find_index_2(float value, gate_t* gate);
+    float get_cell_delay(float input_slew, float load_cap, gate_t *gate);
+    float get_output_slew(float input_slew, float load_cap, gate_t *gate);
 };

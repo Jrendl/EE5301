@@ -45,14 +45,14 @@ int gate_lib::parse_gate_library(char* fName) {
             string val;
             for (int i = 0; i < 7; i++) {
                 iss >> val;
-                gate_lib_array[gate_count].index_1[i] = stof(val);
+                gate_lib_array[gate_count].input_slew_vals[i] = stof(val);
             }
 
         } else if (firstWord.compare("index_2") == 0) {
             string val;
             for (int i = 0; i < 7; i++) {
                 iss >> val;
-                gate_lib_array[gate_count].index_2[i] = stof(val);
+                gate_lib_array[gate_count].load_cap_vals[i] = stof(val);
             }
         } else if (firstWord.compare("values") ==
                    0)  // this is either the first line of the delay or skew
@@ -121,6 +121,15 @@ int gate_lib::parse_gate_library(char* fName) {
         }
     }
 
+    // create output gate
+    gate_count++;
+    gate_lib_array[gate_count].name = "OUTPUT";
+    gate_lib_array[gate_count].capacitance = 4 * 1.700230;
+
+    gate_count++;
+    gate_lib_array[gate_count].name = "INP";
+    gate_lib_array[gate_count].capacitance = 4 * 1.700230;
+
     ifs.close();
     return gate_count;
 }
@@ -138,18 +147,119 @@ int gate_lib::get_gate_count() {
     return gate_count;
 }
 
-int gate_lib::find_index_1(float value, gate_t* gate) {
+float gate_lib::get_cell_delay(float input_slew, float load_cap, gate_t* gate) {
+    int i1 = -1;
+    int i2 = -1;
+
     for (int i = 0; i < 7; i++) {
-        if (gate->index_1[i] == value) {
-            return i;
+        if (gate->input_slew_vals[i] == input_slew) {
+            i1 = i;
         }
+    }
+
+    for (int i = 0; i < 7; i++) {
+        if (gate->load_cap_vals[i] == load_cap) {
+            i2 = i;
+        }
+    }
+
+    if (i1 != -1 && i2 != -1) {
+        return gate->cell_delay[i1][i2];
+    } else {
+        int i1_1, i1_2;
+        int i2_1, i2_2;
+
+        // find the first value larger then input_slew
+        int j = 0;
+        while (gate->input_slew_vals[j] <= input_slew && j < 7) {
+            j++;
+        }
+
+        i1_1 = j - 1;
+        i1_2 = j;
+
+        // find the first value larger then load cap
+        int l = 0;
+        while (gate->load_cap_vals[l] <= load_cap && l < 7) {
+            l++;
+        }
+
+        i2_1 = l - 1;
+        i2_2 = l;
+
+        // why
+        return ((gate->cell_delay[i1_1][i2_1] *
+                 (gate->load_cap_vals[i2_2] - load_cap) *
+                 (gate->input_slew_vals[i1_2] - input_slew)) +
+                (gate->cell_delay[i1_1][i2_2] *
+                 (-gate->load_cap_vals[i2_1] + load_cap) *
+                 (gate->input_slew_vals[i1_2] - input_slew)) +
+                (gate->cell_delay[i1_2][i2_1] *
+                 (gate->load_cap_vals[i2_2] - load_cap) *
+                 (-gate->input_slew_vals[i1_1] + input_slew)) +
+                (gate->cell_delay[i1_2][i2_2] *
+                 (-gate->load_cap_vals[i2_1] + load_cap) *
+                 (-gate->input_slew_vals[i1_1] + input_slew))) /
+               ((gate->load_cap_vals[i2_2] - gate->load_cap_vals[i2_1]) *
+                (gate->input_slew_vals[i1_2] - gate->input_slew_vals[i1_1]));
     }
 }
 
-int gate_lib::find_index_2(float value, gate_t* gate) {
+float gate_lib::get_output_slew(float input_slew, float load_cap,
+                                gate_t* gate) {
+    int i1 = -1;
+    int i2 = -1;
+
     for (int i = 0; i < 7; i++) {
-        if (gate->index_2[i] == value) {
-            return i;
+        if (gate->input_slew_vals[i] == input_slew) {
+            i1 = i;
         }
+    }
+
+    for (int i = 0; i < 7; i++) {
+        if (gate->load_cap_vals[i] == load_cap) {
+            i2 = i;
+        }
+    }
+
+    if (i1 != -1 && i2 != -1) {
+        return gate->output_slew[i1][i2];
+    } else {
+        int i1_1, i1_2;
+        int i2_1, i2_2;
+
+        // find the first value larger then input_slew
+        int j = 0;
+        while (gate->input_slew_vals[j] <= input_slew && j < 7) {
+            j++;
+        }
+
+        i1_1 = j - 1;
+        i1_2 = j;
+
+        // find the first value larger then load cap
+        int l = 0;
+        while (gate->load_cap_vals[l] <= load_cap && l < 7) {
+            l++;
+        }
+
+        i2_1 = l - 1;
+        i2_2 = l;
+
+        // why
+        return ((gate->output_slew[i1_1][i2_1] *
+                 (gate->load_cap_vals[i2_2] - load_cap) *
+                 (gate->input_slew_vals[i1_2] - input_slew)) +
+                (gate->output_slew[i1_1][i2_2] *
+                 (-gate->load_cap_vals[i2_1] + load_cap) *
+                 (gate->input_slew_vals[i1_2] - input_slew)) +
+                (gate->output_slew[i1_2][i2_1] *
+                 (gate->load_cap_vals[i2_2] - load_cap) *
+                 (-gate->input_slew_vals[i1_1] + input_slew)) +
+                (gate->output_slew[i1_2][i2_2] *
+                 (-gate->load_cap_vals[i2_1] + load_cap) *
+                 (-gate->input_slew_vals[i1_1] + input_slew))) /
+               ((gate->load_cap_vals[i2_2] - gate->load_cap_vals[i2_1]) *
+                (gate->input_slew_vals[i1_2] - gate->input_slew_vals[i1_1]));
     }
 }

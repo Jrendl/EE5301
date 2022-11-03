@@ -57,6 +57,9 @@ class circuit_parser {
     };
 
    public:
+    std::vector<std::list<int>> fanin_list;
+    std::vector<std::list<int>> fanout_list;
+    std::map<int, gate_t *> gate_type_map;
     /**
      * @brief Construct a new circuit parser object
      *
@@ -68,9 +71,7 @@ class circuit_parser {
         fanout_list.resize(init_size);
         prep_fanout(0, init_size);
     }
-    std::vector<std::list<int>> fanin_list;
-    std::vector<std::list<int>> fanout_list;
-    std::map<int, gate_t *> gate_type_map;
+
     /**
      * @brief parse fName and store nodes into two adjacency lists: fanin, and
      * fanout
