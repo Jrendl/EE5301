@@ -29,8 +29,8 @@ int timing_analyzer::forward_traverse() {
         std::list<int>::iterator j;
         for (j = parser->fanin_list[gate_num].begin();
              j != parser->fanin_list[gate_num].end(); j++) {
-            input_slew =
-                std::max(input_slew, gate_lib->gate_type_map[gate_num]);
+            // this needs to be the calculated value
+            input_slew = std::max(input_slew, arrival_times[???].first());
         }
     }
 }
