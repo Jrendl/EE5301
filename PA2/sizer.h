@@ -22,6 +22,6 @@ class sizer {
     std::list<std::pair<int, int>> *hor_size(std::list<std::pair<int, int>> *U,
                                              std::list<std::pair<int, int>> *L);
 
-    std::list<std::pair<int, int>> *do_sizing(
+    std::map<int, std::pair<int, int>> *do_sizing(
         std::map<int, std::list<std::pair<int, int>>> *sizes, char *polish);
 };
