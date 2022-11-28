@@ -13,8 +13,11 @@
 
 class sizer {
    private:
+    std::map<int, std::list<std::pair<int, int>>> sizes;
+
    public:
     sizer() {
+        sizes = std::map<int, std::list<std::pair<int, int>>>();
     }
     std::list<std::pair<int, int>> *vert_size(
         std::list<std::pair<int, int>> *L, std::list<std::pair<int, int>> *R);
@@ -23,5 +26,10 @@ class sizer {
                                              std::list<std::pair<int, int>> *L);
 
     std::map<int, std::pair<int, int>> *do_sizing(
-        std::map<int, std::list<std::pair<int, int>>> *sizes, char *polish);
+        std::map<int, std::list<std::pair<int, int>>> *sizes,
+        std::string polish);
+
+    std::map<int, std::list<std::pair<int, int>>> *bottom_up_recursive(
+        std::map<int, std::list<std::pair<int, int>>> *sizes,
+        std::string polish);
 };
