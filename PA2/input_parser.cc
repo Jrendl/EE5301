@@ -40,6 +40,7 @@ int input_parser::parse_file(char *input) {
     // TODO: parse hyper-edges
 
     ifs.close();
+    return 0;
 }
 
 map<int, vector<pair<int, int>>> *input_parser::get_sizes() {

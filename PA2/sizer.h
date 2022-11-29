@@ -15,6 +15,7 @@ using namespace std;
 class sizer {
    private:
     map<int, vector<pair<int, int>>> sizes_by_loc;
+    map<int, pair<int, int>> final_shapes;
     map<int, vector<pair<int, int>>> ij_pairs;
     map<int, bool> used_by_parent;
     map<int, pair<int, int>> coords;
@@ -24,6 +25,7 @@ class sizer {
    public:
     sizer() {
         sizes_by_loc = map<int, vector<pair<int, int>>>();
+        final_shapes = map<int, pair<int, int>>();
         ij_pairs = map<int, vector<pair<int, int>>>();
         used_by_parent = map<int, bool>();
         coords = map<int, pair<int, int>>();
@@ -40,4 +42,5 @@ class sizer {
 
     int bottom_up_recursive(int start);
     int top_down_recursive(int node, int shape);
+    int output_sizing(string);
 };

@@ -179,6 +179,8 @@ int sizer::bottom_up_recursive(int start) {
 
 int sizer::top_down_recursive(int node, int shape) {
     char n = polish.c_str()[node];
+    // store the final shape
+    final_shapes[node] = sizes_by_loc[node][shape];
     if (n == '|' || n == '-') {
         // grab ij values
         pair<int, int> ij = ij_pairs[node][shape];
@@ -217,5 +219,37 @@ int sizer::top_down_recursive(int node, int shape) {
         return 0;
     }
 
+    return 0;
+}
+
+int sizer::output_sizing(string fout) {
+    ofstream ofs(fout.c_str());
+
+    if (ofs.is_open() == 0) {
+        cout << "Error opening " << fout << endl;
+        return -1;
+    }
+
+    // output polish
+    ofs << polish << endl;
+
+    // output total shape
+    ofs << final_shapes[polish.length() - 1].first << " "
+        << final_shapes[polish.length() - 1].second << endl;
+
+    // output total area
+    ofs << final_shapes[polish.length() - 1].first *
+               final_shapes[polish.length() - 1].second
+        << endl;
+
+    for (int i = 0; i < polish.length() - 1; i++) {
+        if (polish.c_str()[i] != '|' && polish.c_str()[i] != '-') {
+            ofs << coords[i].first << " " << coords[i].second << " "
+                << final_shapes[i].first << " " << final_shapes[i].second
+                << endl;
+        }
+    }
+
+    ofs.close();
     return 0;
 }
