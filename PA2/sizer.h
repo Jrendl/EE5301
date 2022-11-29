@@ -5,31 +5,39 @@
 #include <algorithm>
 #include <fstream>   // needed to open files in C++
 #include <iostream>  // basic C++ input/output (e.g., cin, cout)
-#include <list>
 #include <locale>
 #include <map>
 #include <sstream>  // needed if you are using sstream (C++)
 #include <vector>
 
+using namespace std;
+
 class sizer {
    private:
-    std::map<int, std::list<std::pair<int, int>>> sizes;
+    map<int, vector<pair<int, int>>> sizes_by_loc;
+    map<int, vector<pair<int, int>>> ij_pairs;
+    map<int, bool> used_by_parent;
+    map<int, pair<int, int>> coords;
+    map<int, pair<int, int>> children;
+    string polish;
 
    public:
     sizer() {
-        sizes = std::map<int, std::list<std::pair<int, int>>>();
+        sizes_by_loc = map<int, vector<pair<int, int>>>();
+        ij_pairs = map<int, vector<pair<int, int>>>();
+        used_by_parent = map<int, bool>();
+        coords = map<int, pair<int, int>>();
+        children = map<int, pair<int, int>>();
     }
-    std::list<std::pair<int, int>> *vert_size(
-        std::list<std::pair<int, int>> *L, std::list<std::pair<int, int>> *R);
+    pair<vector<pair<int, int>>, vector<pair<int, int>>> vert_size(
+        vector<pair<int, int>> *L, vector<pair<int, int>> *R);
 
-    std::list<std::pair<int, int>> *hor_size(std::list<std::pair<int, int>> *U,
-                                             std::list<std::pair<int, int>> *L);
+    pair<vector<pair<int, int>>, vector<pair<int, int>>> hor_size(
+        vector<pair<int, int>> *U, vector<pair<int, int>> *L);
 
-    std::map<int, std::pair<int, int>> *do_sizing(
-        std::map<int, std::list<std::pair<int, int>>> *sizes,
-        std::string polish);
+    map<int, vector<pair<int, int>>> *do_sizing(
+        map<int, vector<pair<int, int>>> *sizes, string polish);
 
-    std::map<int, std::list<std::pair<int, int>>> *bottom_up_recursive(
-        std::map<int, std::list<std::pair<int, int>>> *sizes,
-        std::string polish);
+    int bottom_up_recursive(int start);
+    int top_down_recursive(int node, int shape);
 };

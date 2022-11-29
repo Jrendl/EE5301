@@ -10,6 +10,9 @@
 #include <sstream>  // needed if you are using sstream (C++)
 #include <vector>
 
+#include "input_parser.h"
+#include "sizer.h"
+
 using namespace std;
 
 int main(int argc, char* argv[]) {
@@ -17,4 +20,14 @@ int main(int argc, char* argv[]) {
         cout << "Please provide input file." << endl;
         return -1;
     }
+
+    input_parser parser = input_parser();
+    parser.parse_file(argv[1]);
+
+    sizer block_sizer = sizer();
+    // TODO: generate real random string
+    string test_string = "12|5-09|-867|34-|-|";
+    block_sizer.do_sizing(parser.get_sizes(), test_string);
+
+    // TODO: output to file
 }
