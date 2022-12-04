@@ -22,6 +22,7 @@ int main(int argc, char* argv[]) {
         cout << "Please provide input file." << endl;
         return -1;
     }
+    srand(time(0));
 
     // parse the input file
     input_parser parser = input_parser();
@@ -46,7 +47,7 @@ string init_random_polish(map<int, vector<pair<int, int>>>* shapes) {
     // make a list of available chars
     string avail_chars = "";
     for (auto it = shapes->begin(); it != shapes->end(); it++) {
-        avail_chars += to_string((*it).first);
+        avail_chars += (char)((*it).first + '0');
     }
 
     // we need spaces for n-1 operators
@@ -61,7 +62,7 @@ string init_random_polish(map<int, vector<pair<int, int>>>* shapes) {
             // choose a node and remove from available
             // rand int between 0 and avail_chars.length-1
             int loc = rand() % avail_chars.length();
-            polish += avail_chars.c_str()[loc];
+            polish += avail_chars[loc];
             avail_chars.erase(loc, 1);
         } else {
             // roll for op node, even odds
@@ -72,11 +73,11 @@ string init_random_polish(map<int, vector<pair<int, int>>>* shapes) {
                 // choose a node and remove from available
                 // rand int between 0 and avail_chars.length-1
                 int loc = rand() % avail_chars.length();
-                polish += avail_chars.c_str()[loc];
+                polish += avail_chars[loc];
                 avail_chars.erase(loc, 1);
             } else if (roll == 0 && avail_chars.length() == 0) {
                 // if we rolled a 0 and there's no characters available
-                char r = polish.c_str()[i - 1];
+                char r = polish[i - 1];
                 if (is_op(r)) {
                     if (r == '|') {
                         polish += '-';
@@ -96,8 +97,8 @@ string init_random_polish(map<int, vector<pair<int, int>>>* shapes) {
             } else {
                 // if we rolled a 1
                 // sample the two characters before the one you're placing
-                char l = polish.c_str()[i - 2];
-                char r = polish.c_str()[i - 1];
+                char l = polish[i - 2];
+                char r = polish[i - 1];
 
                 if (is_op(l) && is_op(r)) {
                     // both are operators
@@ -115,7 +116,7 @@ string init_random_polish(map<int, vector<pair<int, int>>>* shapes) {
                         // choose a node and remove from available
                         // rand int between 0 and avail_chars.length-1
                         int loc = rand() % avail_chars.length();
-                        polish += avail_chars.c_str()[loc];
+                        polish += avail_chars[loc];
                         avail_chars.erase(loc, 1);
                     }
                 } else if (is_op(l) && !is_op(r)) {
@@ -135,7 +136,7 @@ string init_random_polish(map<int, vector<pair<int, int>>>* shapes) {
                         // choose a node and remove from available
                         // rand int between 0 and avail_chars.length-1
                         int loc = rand() % avail_chars.length();
-                        polish += avail_chars.c_str()[loc];
+                        polish += avail_chars[loc];
                         avail_chars.erase(loc, 1);
                     }
                 } else if (!is_op(l) && is_op(r)) {
@@ -154,7 +155,7 @@ string init_random_polish(map<int, vector<pair<int, int>>>* shapes) {
                         // choose a node and remove from available
                         // rand int between 0 and avail_chars.length-1
                         int loc = rand() % avail_chars.length();
-                        polish += avail_chars.c_str()[loc];
+                        polish += avail_chars[loc];
                         avail_chars.erase(loc, 1);
                     }
                 } else {

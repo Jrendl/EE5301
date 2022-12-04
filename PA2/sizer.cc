@@ -61,8 +61,8 @@ map<int, vector<pair<int, int>>> *sizer::do_sizing(
     for (int i = 0; i < polish.length(); i++) {
         used_by_parent[i] = false;
         coords[i] = pair<int, int>(0, 0);
-        char x = polish.c_str()[i];
-        if (x != '|' && x != '-') {
+        unsigned char x = polish[i];
+        if (!is_op(x)) {
             sizes_by_loc[i] = (*sizes)[int(x - '0')];
         } else {
             // init the spaces for the operators to empty vectors
@@ -94,7 +94,7 @@ map<int, vector<pair<int, int>>> *sizer::do_sizing(
 }
 
 int sizer::bottom_up_recursive(int start) {
-    char h = polish.c_str()[start + 2];
+    unsigned char h = polish[start + 2];
 
     if (h == '|') {
         if (!used_by_parent[start]) {
@@ -178,7 +178,7 @@ int sizer::bottom_up_recursive(int start) {
 }
 
 int sizer::top_down_recursive(int node, int shape) {
-    char n = polish.c_str()[node];
+    unsigned char n = polish[node];
     // store the final shape
     final_shapes[node] = sizes_by_loc[node][shape];
     if (n == '|' || n == '-') {
@@ -231,7 +231,14 @@ int sizer::output_sizing(string fout) {
     }
 
     // output polish
-    ofs << polish << endl;
+    for (int i = 0; i < polish.length(); i++) {
+        if (is_op(polish[i])) {
+            ofs << polish[i];
+        } else {
+            ofs << '[' << (int)((unsigned char)polish[i] - '0') << ']';
+        }
+    }
+    ofs << endl;
 
     // output total shape
     ofs << final_shapes[polish.length() - 1].first << " "
@@ -243,7 +250,7 @@ int sizer::output_sizing(string fout) {
         << endl;
 
     for (int i = 0; i < polish.length() - 1; i++) {
-        if (polish.c_str()[i] != '|' && polish.c_str()[i] != '-') {
+        if (!is_op(polish[i])) {
             ofs << coords[i].first << " " << coords[i].second << " "
                 << final_shapes[i].first << " " << final_shapes[i].second
                 << endl;
@@ -252,4 +259,8 @@ int sizer::output_sizing(string fout) {
 
     ofs.close();
     return 0;
+}
+
+bool sizer::is_op(unsigned char c) {
+    return (c == '|' || c == '-');
 }
