@@ -169,8 +169,14 @@ string annealing_engine::init_random_polish() {
             }
         }
     }
-
-    return polish;
+    // this should be fine cause you only have to do it once
+    // should come up with a valid one eventually?
+    // in theory the first one is valid? but this is a good check
+    if (check_valid_polish(polish)) {
+        return polish;
+    } else {
+        return init_random_polish();
+    }
 }
 
 bool annealing_engine::is_op(char c) {
@@ -199,4 +205,18 @@ string annealing_engine::make_move(string polish) {
 float annealing_engine::wire_length(map<int, pair<int, int>> coords) {
     // TODO: implement wire-length calculation
     return 1;
+}
+
+bool annealing_engine::check_valid_polish(string polish) {
+    int count = 0;
+    for (auto it = polish.begin(); it != polish.end(); it++) {
+        if (is_op(*it)) {
+            count--;
+        } else {
+            count++;
+        }
+    }
+    // I think it's valid if it's a positive number?
+    // check this
+    return (count > 0);
 }

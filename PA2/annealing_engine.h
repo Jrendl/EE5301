@@ -34,6 +34,7 @@ class annealing_engine {
     bool is_op(char c);
     string make_move(string polish);
     float wire_length(map<int, pair<int, int>> coords);
+    bool check_valid_polish(string polish);
 
    public:
     annealing_engine(map<int, vector<pair<int, int>>>* shapes, string alpha)
