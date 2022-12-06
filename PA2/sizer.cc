@@ -56,7 +56,14 @@ pair<vector<pair<int, int>>, vector<pair<int, int>>> sizer::hor_size(
 
 map<int, vector<pair<int, int>>> *sizer::do_sizing(
     map<int, vector<pair<int, int>>> *sizes, string polish) {
+    // clear internal variables
     this->polish = polish;
+    sizes_by_loc = map<int, vector<pair<int, int>>>();
+    final_shapes = map<int, pair<int, int>>();
+    ij_pairs = map<int, vector<pair<int, int>>>();
+    used_by_parent = map<int, bool>();
+    coords = map<int, pair<int, int>>();
+    children = map<int, pair<int, int>>();
     // initialization
     for (int i = 0; i < polish.length(); i++) {
         used_by_parent[i] = false;
@@ -263,4 +270,22 @@ int sizer::output_sizing(string fout) {
 
 bool sizer::is_op(unsigned char c) {
     return (c == '|' || c == '-');
+}
+
+map<int, pair<int, int>> sizer::get_coords() {
+    map<int, pair<int, int>> out_coords = map<int, pair<int, int>>();
+
+    for (auto it = coords.begin(); it != coords.end(); it++) {
+        if (!is_op(polish[(*it).first])) {
+            out_coords[(int)((unsigned char)polish[(*it).first] - '0')] =
+                (*it).second;
+        }
+    }
+
+    return out_coords;
+}
+
+float sizer::get_area() {
+    return final_shapes[polish.length() - 1].first *
+           final_shapes[polish.length() - 1].second;
 }

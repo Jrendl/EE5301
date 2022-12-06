@@ -6,8 +6,8 @@ CFLAGS = -Wall -g
 # ****************************************************
 # Targets needed to bring the executable up to date
  
-main: main.o input_parser.o sizer.o #all .o
-	$(CC) $(CFLAGS) -o main main.o input_parser.o sizer.o
+main: main.o input_parser.o sizer.o annealing_engine.o #all .o
+	$(CC) $(CFLAGS) -o main main.o input_parser.o sizer.o annealing_engine.o
  
 # The main.o target can be written more simply
  
@@ -19,3 +19,6 @@ input_parser.o: input_parser.h input_parser.cc
 
 sizer.o: sizer.h sizer.cc 
 	$(CC) $(CFLAGS) -c sizer.cc
+
+annealing_engine.o: annealing_engine.h annealing_engine.cc sizer.h
+	$(CC) $(CFLAGS) -c annealing_engine.cc
