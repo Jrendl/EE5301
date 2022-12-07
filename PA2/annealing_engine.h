@@ -28,13 +28,13 @@ class annealing_engine {
     sizer sizing;
 
     bool accept_move(float delta_cost, float T);
-    float cost(string solution);
+    float cost(vector<string> solution);
     float cool_down(float T);
-    string init_random_polish();
-    bool is_op(char c);
-    string make_move(string polish);
+
+    bool is_op(string c);
+    vector<string> make_move(vector<string> polish);
     float wire_length(map<int, pair<int, int>> coords);
-    bool check_valid_polish(string polish);
+    bool check_valid_polish(vector<string> polish);
 
    public:
     annealing_engine(map<int, vector<pair<int, int>>>* shapes, string alpha)
@@ -48,5 +48,6 @@ class annealing_engine {
             this->alpha = C;
         }
     }
-    string do_annealing();
+    vector<string> do_annealing();
+    vector<string> init_random_polish();
 };

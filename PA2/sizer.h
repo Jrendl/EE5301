@@ -20,8 +20,8 @@ class sizer {
     map<int, bool> used_by_parent;
     map<int, pair<int, int>> coords;
     map<int, pair<int, int>> children;
-    string polish;
-    bool is_op(unsigned char c);
+    vector<string> polish;
+    bool is_op(string c);
 
    public:
     sizer() {
@@ -39,11 +39,11 @@ class sizer {
         vector<pair<int, int>> *U, vector<pair<int, int>> *L);
 
     map<int, vector<pair<int, int>>> *do_sizing(
-        map<int, vector<pair<int, int>>> *sizes, string polish);
+        map<int, vector<pair<int, int>>> *sizes, vector<string> polish);
 
     int bottom_up_recursive(int start);
     int top_down_recursive(int node, int shape);
-    int output_sizing(string);
+    int output_sizing(string fout);
     map<int, pair<int, int>> get_coords();
     float get_area();
 };

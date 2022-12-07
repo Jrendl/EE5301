@@ -1,12 +1,12 @@
 #include "annealing_engine.h"
 
-string annealing_engine::do_annealing() {
-    string cur_sol = init_random_polish();
+vector<string> annealing_engine::do_annealing() {
+    vector<string> cur_sol = init_random_polish();
 
     float T = T_0;
     while (T > T_FREEZE) {
         for (int i = 0; i < NUM_MOVES_PER_TEMP_STEP; i++) {
-            string next_sol = make_move(cur_sol);
+            vector<string> next_sol = make_move(cur_sol);
             float delta_cost = cost(next_sol) - cost(cur_sol);
             if (accept_move(delta_cost, T)) {
                 cur_sol = next_sol;
@@ -28,7 +28,7 @@ bool annealing_engine::accept_move(float delta_cost, float T) {
     }
 }
 
-float annealing_engine::cost(string solution) {
+float annealing_engine::cost(vector<string> solution) {
     sizing.do_sizing(shapes, solution);
     return ((alpha * sizing.get_area()) +
             ((1 - alpha) * wire_length(sizing.get_coords())));
@@ -38,19 +38,19 @@ float annealing_engine::cool_down(float T) {
     return COOLING_RATE * T;
 }
 
-string annealing_engine::init_random_polish() {
+vector<string> annealing_engine::init_random_polish() {
     // TODO: make this actually work
     int strlength = shapes->size();
 
     // make a list of available chars
-    string avail_chars = "";
+    vector<string> avail_chars = vector<string>();
     for (auto it = shapes->begin(); it != shapes->end(); it++) {
-        avail_chars += (char)((*it).first + '0');
+        avail_chars.push_back(to_string((*it).first));
     }
 
     // we need spaces for n-1 operators
     strlength += (strlength - 1);
-    string polish = "";
+    vector<string> polish = vector<string>();
 
     for (int i = 0; i < strlength; i++) {
         if (i < 2) {
@@ -59,44 +59,44 @@ string annealing_engine::init_random_polish() {
 
             // choose a node and remove from available
             // rand int between 0 and avail_chars.length-1
-            int loc = rand() % avail_chars.length();
-            polish += avail_chars[loc];
-            avail_chars.erase(loc, 1);
+            int loc = rand() % avail_chars.size();
+            polish.push_back(avail_chars[loc]);
+            avail_chars.erase(loc + avail_chars.begin());
         } else {
             // roll for op node, even odds
             int roll = rand() % 2;
-            if (roll == 0 && avail_chars.length() > 0) {
+            if (roll == 0 && avail_chars.size() > 0) {
                 // if we rolled a 0 and there's characters available
                 // choose a character
                 // choose a node and remove from available
                 // rand int between 0 and avail_chars.length-1
-                int loc = rand() % avail_chars.length();
-                polish += avail_chars[loc];
-                avail_chars.erase(loc, 1);
-            } else if (roll == 0 && avail_chars.length() == 0) {
+                int loc = rand() % avail_chars.size();
+                polish.push_back(avail_chars[loc]);
+                avail_chars.erase(loc + avail_chars.begin());
+            } else if (roll == 0 && avail_chars.size() == 0) {
                 // if we rolled a 0 and there's no characters available
-                char r = polish[i - 1];
+                string r = polish[i - 1];
                 if (is_op(r)) {
-                    if (r == '|') {
-                        polish += '-';
+                    if (r.compare("|") == 0) {
+                        polish.push_back("-");
                     } else {
-                        polish += '|';
+                        polish.push_back("|");
                     }
                 } else {
                     // we can place an op
                     int op = rand() % 2;
                     if (op == 0) {
-                        polish += '|';
+                        polish.push_back("|");
                     } else {
-                        polish += '-';
+                        polish.push_back("-");
                     }
                 }
 
             } else {
                 // if we rolled a 1
                 // sample the two characters before the one you're placing
-                char l = polish[i - 2];
-                char r = polish[i - 1];
+                string l = polish[i - 2];
+                string r = polish[i - 1];
 
                 if (is_op(l) && is_op(r)) {
                     // both are operators
@@ -104,18 +104,18 @@ string annealing_engine::init_random_polish() {
                     if (i >= 7) {
                         // place an op
                         // can't be the same as r
-                        if (r == '|') {
-                            polish += '-';
+                        if (r.compare("|") == 0) {
+                            polish.push_back("-");
                         } else {
-                            polish += '|';
+                            polish.push_back("|");
                         }
                     } else {
                         // place a node
                         // choose a node and remove from available
                         // rand int between 0 and avail_chars.length-1
-                        int loc = rand() % avail_chars.length();
-                        polish += avail_chars[loc];
-                        avail_chars.erase(loc, 1);
+                        int loc = rand() % avail_chars.size();
+                        polish.push_back(avail_chars[loc]);
+                        avail_chars.erase(loc + avail_chars.begin());
                     }
                 } else if (is_op(l) && !is_op(r)) {
                     // the left child is an op
@@ -125,17 +125,17 @@ string annealing_engine::init_random_polish() {
                         // doesn't matter which one cause right child isn't op
                         int op = rand() % 2;
                         if (op == 0) {
-                            polish += '|';
+                            polish.push_back("|");
                         } else {
-                            polish += '-';
+                            polish.push_back("-");
                         }
                     } else {
                         // place a node
                         // choose a node and remove from available
                         // rand int between 0 and avail_chars.length-1
-                        int loc = rand() % avail_chars.length();
-                        polish += avail_chars[loc];
-                        avail_chars.erase(loc, 1);
+                        int loc = rand() % avail_chars.size();
+                        polish.push_back(avail_chars[loc]);
+                        avail_chars.erase(loc + avail_chars.begin());
                     }
                 } else if (!is_op(l) && is_op(r)) {
                     // right child is an op
@@ -143,27 +143,27 @@ string annealing_engine::init_random_polish() {
                     // we can only place the op that is not in r
                     if (i >= 5) {
                         // place the op not in r
-                        if (r == '|') {
-                            polish += '-';
+                        if (r.compare("|") == 0) {
+                            polish.push_back("-");
                         } else {
-                            polish += '|';
+                            polish.push_back("|");
                         }
                     } else {
                         // place a node
                         // choose a node and remove from available
                         // rand int between 0 and avail_chars.length-1
-                        int loc = rand() % avail_chars.length();
-                        polish += avail_chars[loc];
-                        avail_chars.erase(loc, 1);
+                        int loc = rand() % avail_chars.size();
+                        polish.push_back(avail_chars[loc]);
+                        avail_chars.erase(loc + avail_chars.begin());
                     }
                 } else {
                     // neither are ops
                     // we can place an op
                     int op = rand() % 2;
                     if (op == 0) {
-                        polish += '|';
+                        polish.push_back("|");
                     } else {
-                        polish += '-';
+                        polish.push_back("-");
                     }
                 }
             }
@@ -179,13 +179,13 @@ string annealing_engine::init_random_polish() {
     }
 }
 
-bool annealing_engine::is_op(char c) {
-    return (c == '|' || c == '-');
+bool annealing_engine::is_op(string c) {
+    return (c.compare("|") == 0 || c.compare("-") == 0);
 }
 
-string annealing_engine::make_move(string polish) {
+vector<string> annealing_engine::make_move(vector<string> polish) {
     int r = rand() % 3;
-    string out = polish;
+    vector<string> out = polish;
     switch (r) {
         // TODO: implement moves
         case 0:
@@ -207,7 +207,7 @@ float annealing_engine::wire_length(map<int, pair<int, int>> coords) {
     return 1;
 }
 
-bool annealing_engine::check_valid_polish(string polish) {
+bool annealing_engine::check_valid_polish(vector<string> polish) {
     int count = 0;
     for (auto it = polish.begin(); it != polish.end(); it++) {
         if (is_op(*it)) {
@@ -216,7 +216,6 @@ bool annealing_engine::check_valid_polish(string polish) {
             count++;
         }
     }
-    // I think it's valid if it's a positive number?
-    // check this
-    return (count > 0);
+
+    return (count == 1);
 }

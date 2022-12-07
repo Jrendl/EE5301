@@ -55,7 +55,7 @@ pair<vector<pair<int, int>>, vector<pair<int, int>>> sizer::hor_size(
 }
 
 map<int, vector<pair<int, int>>> *sizer::do_sizing(
-    map<int, vector<pair<int, int>>> *sizes, string polish) {
+    map<int, vector<pair<int, int>>> *sizes, vector<string> polish) {
     // clear internal variables
     this->polish = polish;
     sizes_by_loc = map<int, vector<pair<int, int>>>();
@@ -65,12 +65,12 @@ map<int, vector<pair<int, int>>> *sizer::do_sizing(
     coords = map<int, pair<int, int>>();
     children = map<int, pair<int, int>>();
     // initialization
-    for (int i = 0; i < polish.length(); i++) {
+    for (int i = 0; i < polish.size(); i++) {
         used_by_parent[i] = false;
         coords[i] = pair<int, int>(0, 0);
-        unsigned char x = polish[i];
+        string x = polish[i];
         if (!is_op(x)) {
-            sizes_by_loc[i] = (*sizes)[int(x - '0')];
+            sizes_by_loc[i] = (*sizes)[stoi(x)];
         } else {
             // init the spaces for the operators to empty vectors
             sizes_by_loc[i] = vector<pair<int, int>>();
@@ -79,7 +79,7 @@ map<int, vector<pair<int, int>>> *sizer::do_sizing(
 
     int err_code = bottom_up_recursive(0);
 
-    int head = polish.length() - 1;
+    int head = polish.size() - 1;
 
     auto it = sizes_by_loc[head].begin();
     int min_area_space = 0;
@@ -101,9 +101,9 @@ map<int, vector<pair<int, int>>> *sizer::do_sizing(
 }
 
 int sizer::bottom_up_recursive(int start) {
-    unsigned char h = polish[start + 2];
+    string h = polish[start + 2];
 
-    if (h == '|') {
+    if (h.compare("|") == 0) {
         if (!used_by_parent[start]) {
             // we only care about the left child
             pair<vector<pair<int, int>>, vector<pair<int, int>>> split_info =
@@ -138,7 +138,7 @@ int sizer::bottom_up_recursive(int start) {
             children[start + 2] = pair<int, int>(direct_child, start + 1);
         }
 
-    } else if (h == '-') {
+    } else if (h.compare("-") == 0) {
         if (!used_by_parent[start]) {
             // we only care about the left child
             pair<vector<pair<int, int>>, vector<pair<int, int>>> split_info =
@@ -174,7 +174,7 @@ int sizer::bottom_up_recursive(int start) {
         }
     }
 
-    if (start + 3 >= polish.length()) {
+    if (start + 3 >= polish.size()) {
         // we've reached the end of the string since we're looking 2 ahead for
         // all of them
         return 0;
@@ -185,10 +185,11 @@ int sizer::bottom_up_recursive(int start) {
 }
 
 int sizer::top_down_recursive(int node, int shape) {
-    unsigned char n = polish[node];
+    // TODO: Something's Wrong here
+    string n = polish[node];
     // store the final shape
     final_shapes[node] = sizes_by_loc[node][shape];
-    if (n == '|' || n == '-') {
+    if (is_op(n)) {
         // grab ij values
         pair<int, int> ij = ij_pairs[node][shape];
         int child_1 = children[node].first;
@@ -196,7 +197,7 @@ int sizer::top_down_recursive(int node, int shape) {
         pair<int, int> child_1_dims = sizes_by_loc[child_1][ij.first];
         pair<int, int> child_2_dims = sizes_by_loc[child_2][ij.second];
 
-        if (n == '|') {
+        if (n.compare("|") == 0) {
             // set left child's coords to ours
             coords[child_1] = coords[node];
 
@@ -238,25 +239,25 @@ int sizer::output_sizing(string fout) {
     }
 
     // output polish
-    for (int i = 0; i < polish.length(); i++) {
+    for (int i = 0; i < polish.size(); i++) {
         if (is_op(polish[i])) {
             ofs << polish[i];
         } else {
-            ofs << '[' << (int)((unsigned char)polish[i] - '0') << ']';
+            ofs << '[' << polish[i] << ']';
         }
     }
     ofs << endl;
 
     // output total shape
-    ofs << final_shapes[polish.length() - 1].first << " "
-        << final_shapes[polish.length() - 1].second << endl;
+    ofs << final_shapes[polish.size() - 1].first << " "
+        << final_shapes[polish.size() - 1].second << endl;
 
     // output total area
-    ofs << final_shapes[polish.length() - 1].first *
-               final_shapes[polish.length() - 1].second
+    ofs << final_shapes[polish.size() - 1].first *
+               final_shapes[polish.size() - 1].second
         << endl;
 
-    for (int i = 0; i < polish.length() - 1; i++) {
+    for (int i = 0; i < polish.size() - 1; i++) {
         if (!is_op(polish[i])) {
             ofs << coords[i].first << " " << coords[i].second << " "
                 << final_shapes[i].first << " " << final_shapes[i].second
@@ -268,8 +269,8 @@ int sizer::output_sizing(string fout) {
     return 0;
 }
 
-bool sizer::is_op(unsigned char c) {
-    return (c == '|' || c == '-');
+bool sizer::is_op(string c) {
+    return (c.compare("|") == 0 || c.compare("-") == 0);
 }
 
 map<int, pair<int, int>> sizer::get_coords() {
@@ -277,8 +278,7 @@ map<int, pair<int, int>> sizer::get_coords() {
 
     for (auto it = coords.begin(); it != coords.end(); it++) {
         if (!is_op(polish[(*it).first])) {
-            out_coords[(int)((unsigned char)polish[(*it).first] - '0')] =
-                (*it).second;
+            out_coords[stoi(polish[(*it).first])] = (*it).second;
         }
     }
 
@@ -286,6 +286,6 @@ map<int, pair<int, int>> sizer::get_coords() {
 }
 
 float sizer::get_area() {
-    return final_shapes[polish.length() - 1].first *
-           final_shapes[polish.length() - 1].second;
+    return final_shapes[polish.size() - 1].first *
+           final_shapes[polish.size() - 1].second;
 }
