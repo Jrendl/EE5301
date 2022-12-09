@@ -6,6 +6,8 @@
 #include <algorithm>
 #include <fstream>   // needed to open files in C++
 #include <iostream>  // basic C++ input/output (e.g., cin, cout)
+#include <iterator>
+#include <list>
 #include <locale>
 #include <map>
 #include <sstream>  // needed if you are using sstream (C++)
@@ -23,6 +25,7 @@ class annealing_engine {
     const float C = 0.5;
 
     map<int, vector<pair<int, int>>>* shapes;
+    vector<list<int>>* edges;
     float alpha;
 
     sizer sizing;
@@ -33,12 +36,13 @@ class annealing_engine {
 
     bool is_op(string c);
     vector<string> make_move(vector<string> polish);
-    float wire_length(map<int, pair<int, int>> coords);
+    float wire_length(map<int, pair<float, float>> coords);
     bool check_valid_polish(vector<string> polish);
 
    public:
-    annealing_engine(map<int, vector<pair<int, int>>>* shapes, string alpha)
-        : shapes(shapes) {
+    annealing_engine(map<int, vector<pair<int, int>>>* shapes,
+                     vector<list<int>>* edges, string alpha)
+        : shapes(shapes), edges(edges) {
         sizing = sizer();
         if (alpha.compare("-w") == 0) {
             this->alpha = 0;

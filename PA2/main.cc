@@ -32,7 +32,7 @@ int main(int argc, char* argv[]) {
 
     // sizer block_sizer = sizer();
     annealing_engine engine =
-        annealing_engine(parser.get_sizes(), string(argv[2]));
+        annealing_engine(parser.get_sizes(), parser.get_edges(), (argv[2]));
     cout << "initialized engine" << endl;
     vector<string> test_polish = engine.init_random_polish();
     for (auto it = test_polish.begin(); it != test_polish.end(); it++) {

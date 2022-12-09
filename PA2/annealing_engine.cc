@@ -39,7 +39,6 @@ float annealing_engine::cool_down(float T) {
 }
 
 vector<string> annealing_engine::init_random_polish() {
-    // TODO: make this actually work
     int strlength = shapes->size();
 
     // make a list of available chars
@@ -184,38 +183,118 @@ bool annealing_engine::is_op(string c) {
 }
 
 vector<string> annealing_engine::make_move(vector<string> polish) {
-    int r = rand() % 3;
+    int op = rand() % 3;
     vector<string> out = polish;
-    switch (r) {
-        // TODO: implement moves
-        case 0:
+    switch (op) {
+        case 0: {
             // OP1: exchange two operands that have no other operands in between
+            // generate random int between [0, polish.size()-1)
+            // excluding the last value allows us to safely swap the second to
+            // last and last
+            int r = rand() % out.size() - 1;
+
+            // find two operands next to each other
+            while (is_op(out[r]) || is_op(out[r + 1])) {
+                r = rand() % out.size() - 1;
+            }
+
+            // swap the position of the two operands
+            iter_swap(out.begin() + r, out.begin() + r + 1);
             break;
-        case 1:
+        }
+        case 1: {
             // OP2: Complement a series of operators between two operands
+            int r = rand() % out.size() - 1;
+
+            // find the first operator in a group of operators
+            while (!(is_op(out[r]) && !is_op(out[r - 1]))) {
+                r = rand() % out.size() - 1;
+            }
+
+            // while the value of r is an operator
+            // protect against seg fault
+            while (r < out.size() && is_op(out[r])) {
+                // compliment the operator
+                if (out[r].compare("|") == 0) {
+                    out[r] = "-";
+                } else {
+                    out[r] = "|";
+                }
+
+                // increment r
+                r++;
+            }
             break;
-        case 2:
+        }
+        case 2: {
             // OP3: Exchange adjacent operance and operator if the resulting
             // expression still a normalized polish exp
+            int r = rand() % out.size() - 1;
+
+            do {
+                // find an operator next to an operand
+                while (!(is_op(out[r]) && !is_op(out[r + 1]))) {
+                    r = rand() % out.size() - 1;
+                }
+
+                // swap the operator and operand
+                iter_swap(out.begin() + r, out.begin() + r + 1);
+                // make sure we've got a correct polish expression
+                // if not, repeat the process
+            } while (check_valid_polish(out));
+
             break;
+        }
     }
     return out;
 }
 
-float annealing_engine::wire_length(map<int, pair<int, int>> coords) {
-    // TODO: implement wire-length calculation
-    return 1;
+float annealing_engine::wire_length(map<int, pair<float, float>> coords) {
+    // sum of all the half-perimeter wire lengths
+    float wire_length_sum = 0;
+
+    // for each of the hyper edges
+    for (auto it = edges->begin(); it != edges->end(); it++) {
+        float min_x = -MAXFLOAT;
+        float max_x = MAXFLOAT;
+
+        float min_y = -MAXFLOAT;
+        float max_y = MAXFLOAT;
+
+        // for each of the nodes in that hyper edge
+        for (auto j = (*it).begin(); j != (*it).end(); j++) {
+            // which has the max/min x value
+            min_x = std::min(coords[*j].first, min_x);
+            max_x = std::max(coords[*j].first, max_x);
+
+            // which has the max/min y values
+            min_y = std::min(coords[*j].second, min_y);
+            max_y = std::max(coords[*j].second, max_y);
+        }
+
+        // find the half-perimeter of the bounding box of this hyper-edge
+        wire_length_sum += (max_y - min_y) + (max_x - min_x);
+    }
+
+    return wire_length_sum;
 }
 
 bool annealing_engine::check_valid_polish(vector<string> polish) {
     int count = 0;
+    bool no_repeats = true;
     for (auto it = polish.begin(); it != polish.end(); it++) {
         if (is_op(*it)) {
             count--;
+            // if the next value isn't over-reaching the limits
+            //  compare this value and the next to make sure they aren't the
+            //  same
+            if (it != polish.end() - 1 && (*it).compare(*next(it, 1)) == 0) {
+                no_repeats = false;
+            }
         } else {
             count++;
         }
     }
 
-    return (count == 1);
+    return (count == 1 && no_repeats);
 }

@@ -273,12 +273,17 @@ bool sizer::is_op(string c) {
     return (c.compare("|") == 0 || c.compare("-") == 0);
 }
 
-map<int, pair<int, int>> sizer::get_coords() {
-    map<int, pair<int, int>> out_coords = map<int, pair<int, int>>();
+map<int, pair<float, float>> sizer::get_coords() {
+    map<int, pair<float, float>> out_coords = map<int, pair<float, float>>();
 
+    // should find the center of the shapes
     for (auto it = coords.begin(); it != coords.end(); it++) {
         if (!is_op(polish[(*it).first])) {
-            out_coords[stoi(polish[(*it).first])] = (*it).second;
+            out_coords[stoi(polish[(*it).first])] = pair<float, float>(
+                (*it).second.first +
+                    (float)final_shapes[(*it).first].first / 2.0,
+                (*it).second.second +
+                    (float)final_shapes[(*it).first].second / 2.0);
         }
     }
 

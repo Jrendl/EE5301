@@ -44,6 +44,6 @@ class sizer {
     int bottom_up_recursive(int start);
     int top_down_recursive(int node, int shape);
     int output_sizing(string fout);
-    map<int, pair<int, int>> get_coords();
+    map<int, pair<float, float>> get_coords();
     float get_area();
 };
