@@ -189,7 +189,7 @@ vector<string> annealing_engine::make_move(vector<string> polish) {
                 iter_swap(out.begin() + r, out.begin() + r + 1);
                 // make sure we've got a correct polish expression
                 // if not, repeat the process
-            } while (check_valid_polish(out));
+            } while (!check_valid_polish(out));
 
             break;
         }
