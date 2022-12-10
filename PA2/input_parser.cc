@@ -43,6 +43,7 @@ int input_parser::parse_file(char *input) {
 
     // number of hyper-edges
     int num_edges = stoi((string)lineBuf);
+    edges.resize(num_edges);
 
     // get each of the hyper-edges
     for (int i = 0; i < num_edges; i++) {
@@ -50,6 +51,7 @@ int input_parser::parse_file(char *input) {
         string lineStr(lineBuf);
         istringstream iss(lineStr);
         string curWord;
+        edges[i] = list<int>();
         while (iss.good()) {
             iss >> curWord;
             // if((iss >> curWord) < 1){

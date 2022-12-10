@@ -41,6 +41,10 @@ float annealing_engine::cool_down(float T) {
 vector<string> annealing_engine::init_random_polish() {
     int strlength = shapes->size();
 
+    // add when u add a number, subtract when there's an operator
+    // should never dip below 1
+    int sum = 0;
+
     // make a list of available chars
     vector<string> avail_chars = vector<string>();
     for (auto it = shapes->begin(); it != shapes->end(); it++) {
@@ -51,123 +55,67 @@ vector<string> annealing_engine::init_random_polish() {
     strlength += (strlength - 1);
     vector<string> polish = vector<string>();
 
-    for (int i = 0; i < strlength; i++) {
-        if (i < 2) {
-            // the first two chars must always be nodes for a valid polish
-            // expression
+    // while there's still chars left
+    while (avail_chars.size() > 0) {
+        // roll a 0/1
+        int r = rand() % 2;
+        // if sum is less than 2 or we rolled a 0
+        if (sum < 2 || r == 0) {
+            //  add a char
+            //  increment sum
 
             // choose a node and remove from available
             // rand int between 0 and avail_chars.length-1
             int loc = rand() % avail_chars.size();
             polish.push_back(avail_chars[loc]);
             avail_chars.erase(loc + avail_chars.begin());
+            sum++;
         } else {
-            // roll for op node, even odds
-            int roll = rand() % 2;
-            if (roll == 0 && avail_chars.size() > 0) {
-                // if we rolled a 0 and there's characters available
-                // choose a character
-                // choose a node and remove from available
-                // rand int between 0 and avail_chars.length-1
-                int loc = rand() % avail_chars.size();
-                polish.push_back(avail_chars[loc]);
-                avail_chars.erase(loc + avail_chars.begin());
-            } else if (roll == 0 && avail_chars.size() == 0) {
-                // if we rolled a 0 and there's no characters available
-                string r = polish[i - 1];
-                if (is_op(r)) {
-                    if (r.compare("|") == 0) {
-                        polish.push_back("-");
-                    } else {
-                        polish.push_back("|");
-                    }
+            // sum is at least 2 and we rolled a 1
+
+            //  add op that's not before it
+            //  decrement sum
+            string r = polish[polish.size() - 1];
+            if (is_op(r)) {
+                if (r.compare("|") == 0) {
+                    polish.push_back("-");
                 } else {
-                    // we can place an op
-                    int op = rand() % 2;
-                    if (op == 0) {
-                        polish.push_back("|");
-                    } else {
-                        polish.push_back("-");
-                    }
+                    polish.push_back("|");
                 }
-
             } else {
-                // if we rolled a 1
-                // sample the two characters before the one you're placing
-                string l = polish[i - 2];
-                string r = polish[i - 1];
-
-                if (is_op(l) && is_op(r)) {
-                    // both are operators
-                    // i must be at least 7
-                    if (i >= 7) {
-                        // place an op
-                        // can't be the same as r
-                        if (r.compare("|") == 0) {
-                            polish.push_back("-");
-                        } else {
-                            polish.push_back("|");
-                        }
-                    } else {
-                        // place a node
-                        // choose a node and remove from available
-                        // rand int between 0 and avail_chars.length-1
-                        int loc = rand() % avail_chars.size();
-                        polish.push_back(avail_chars[loc]);
-                        avail_chars.erase(loc + avail_chars.begin());
-                    }
-                } else if (is_op(l) && !is_op(r)) {
-                    // the left child is an op
-                    //  i must be at least 5
-                    if (i >= 5) {
-                        // place an op
-                        // doesn't matter which one cause right child isn't op
-                        int op = rand() % 2;
-                        if (op == 0) {
-                            polish.push_back("|");
-                        } else {
-                            polish.push_back("-");
-                        }
-                    } else {
-                        // place a node
-                        // choose a node and remove from available
-                        // rand int between 0 and avail_chars.length-1
-                        int loc = rand() % avail_chars.size();
-                        polish.push_back(avail_chars[loc]);
-                        avail_chars.erase(loc + avail_chars.begin());
-                    }
-                } else if (!is_op(l) && is_op(r)) {
-                    // right child is an op
-                    //  i must be at least 5
-                    // we can only place the op that is not in r
-                    if (i >= 5) {
-                        // place the op not in r
-                        if (r.compare("|") == 0) {
-                            polish.push_back("-");
-                        } else {
-                            polish.push_back("|");
-                        }
-                    } else {
-                        // place a node
-                        // choose a node and remove from available
-                        // rand int between 0 and avail_chars.length-1
-                        int loc = rand() % avail_chars.size();
-                        polish.push_back(avail_chars[loc]);
-                        avail_chars.erase(loc + avail_chars.begin());
-                    }
+                // we can place an op
+                int op = rand() % 2;
+                if (op == 0) {
+                    polish.push_back("|");
                 } else {
-                    // neither are ops
-                    // we can place an op
-                    int op = rand() % 2;
-                    if (op == 0) {
-                        polish.push_back("|");
-                    } else {
-                        polish.push_back("-");
-                    }
+                    polish.push_back("-");
                 }
             }
+            sum--;
         }
     }
+
+    // alternate ops until end
+    for (int i = polish.size(); i < strlength; i++) {
+        string r = polish[polish.size() - 1];
+        if (is_op(r)) {
+            if (r.compare("|") == 0) {
+                polish.push_back("-");
+            } else {
+                polish.push_back("|");
+            }
+        } else {
+            // we can place an op
+            int op = rand() % 2;
+            if (op == 0) {
+                polish.push_back("|");
+            } else {
+                polish.push_back("-");
+            }
+        }
+        sum--;
+    }
+
     // this should be fine cause you only have to do it once
     // should come up with a valid one eventually?
     // in theory the first one is valid? but this is a good check

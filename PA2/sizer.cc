@@ -123,6 +123,9 @@ int sizer::bottom_up_recursive(int start) {
             int direct_child = start;
             while (used_by_parent[direct_child]) {
                 direct_child--;
+                if (direct_child == -1) {
+                    cout << "here";
+                }
             }
 
             pair<vector<pair<int, int>>, vector<pair<int, int>>> split_info =
@@ -185,7 +188,6 @@ int sizer::bottom_up_recursive(int start) {
 }
 
 int sizer::top_down_recursive(int node, int shape) {
-    // TODO: Something's Wrong here
     string n = polish[node];
     // store the final shape
     final_shapes[node] = sizes_by_loc[node][shape];

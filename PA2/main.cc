@@ -34,7 +34,9 @@ int main(int argc, char* argv[]) {
     annealing_engine engine =
         annealing_engine(parser.get_sizes(), parser.get_edges(), (argv[2]));
     cout << "initialized engine" << endl;
+
     vector<string> test_polish = engine.init_random_polish();
+
     for (auto it = test_polish.begin(); it != test_polish.end(); it++) {
         cout << (*it);
     }
