@@ -17,12 +17,13 @@
 
 class annealing_engine {
    private:
-    const float T_0 = 40000;
-    const float T_FREEZE = 0.1;
-    const int NUM_MOVES_PER_TEMP_STEP = 5;
-    const float K = 0.5;
-    const float COOLING_RATE = 0.95;
+    const float T_0 = 2000;
+    const float ACCEPT_AT_START = 0.80;
+    const float T_FREEZE = 0.5;
+    const int NUM_MOVES_PER_TEMP_STEP = 50;
     const float C = 0.5;
+
+    float K = 0;
 
     map<int, vector<pair<int, int>>>* shapes;
     vector<list<int>>* edges;
@@ -38,6 +39,7 @@ class annealing_engine {
     vector<string> make_move(vector<string> polish);
     float wire_length(map<int, pair<float, float>> coords);
     bool check_valid_polish(vector<string> polish);
+    float compute_K(vector<string> polish);
 
    public:
     annealing_engine(map<int, vector<pair<int, int>>>* shapes,

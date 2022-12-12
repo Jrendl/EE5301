@@ -1,20 +1,41 @@
 #include "annealing_engine.h"
 
 vector<string> annealing_engine::do_annealing() {
+    // logging
+    ofstream cost_out("./cost.txt");
+    ofstream accepted_moves("./accepted_moves.txt");
+
     vector<string> cur_sol = init_random_polish();
+
+    K = compute_K(cur_sol);
 
     float T = T_0;
     while (T > T_FREEZE) {
+        // logging
+        int num_accepted = 0;
+
         for (int i = 0; i < NUM_MOVES_PER_TEMP_STEP; i++) {
             vector<string> next_sol = make_move(cur_sol);
-            float delta_cost = cost(next_sol) - cost(cur_sol);
+
+            // logging
+            float cur_cost = cost(cur_sol);
+            cost_out << cur_cost << endl;
+
+            float delta_cost = cost(next_sol) - cur_cost;
             if (accept_move(delta_cost, T)) {
                 cur_sol = next_sol;
+
+                // logging
+                num_accepted++;
             }
         }
+
+        accepted_moves << T << ": " << num_accepted << endl;
         T = cool_down(T);
     }
 
+    cost_out.close();
+    accepted_moves.close();
     return cur_sol;
 }
 
@@ -24,7 +45,7 @@ bool annealing_engine::accept_move(float delta_cost, float T) {
     } else {
         float boltz = exp((-delta_cost) / (K * T));
         float r = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
-        return (r < boltz);
+        return (r <= boltz);
     }
 }
 
@@ -35,7 +56,15 @@ float annealing_engine::cost(vector<string> solution) {
 }
 
 float annealing_engine::cool_down(float T) {
-    return COOLING_RATE * T;
+    if (T > (T_0 / 2)) {
+        return 0.65 * T;
+    } else if (T > (T_0 / 4)) {
+        return 0.85 * T;
+    } else if (T > (T_0 / 16)) {
+        return 0.98 * T;
+    } else {
+        return 0.91 * T;
+    }
 }
 
 vector<string> annealing_engine::init_random_polish() {
@@ -273,4 +302,18 @@ int annealing_engine::output(string fout) {
     sizing.output_sizing(fout);
 
     return 0;
+}
+
+float annealing_engine::compute_K(vector<string> polish) {
+    float sum = 0;
+    vector<string> sol = polish;
+
+    for (int i = 0; i < 250; i++) {
+        vector<string> new_sol = make_move(polish);
+
+        sum += abs(cost(new_sol) - cost(sol));
+        sol = new_sol;
+    }
+
+    return (-(sum / 249) / (log(ACCEPT_AT_START) * T_0));
 }
