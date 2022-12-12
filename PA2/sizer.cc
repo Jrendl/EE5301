@@ -124,7 +124,6 @@ int sizer::bottom_up_recursive(int start) {
             while (used_by_parent[direct_child]) {
                 direct_child--;
                 if (direct_child == -1) {
-                    cout << "here";
                 }
             }
 
@@ -233,13 +232,13 @@ int sizer::top_down_recursive(int node, int shape) {
 }
 
 int sizer::output_sizing(string fout) {
-    ofstream ofs(fout.c_str());
+    // open in append mode
+    ofstream ofs(fout.c_str(), ios_base::app);
 
     if (ofs.is_open() == 0) {
         cout << "Error opening " << fout << endl;
         return -1;
     }
-
     // output polish
     for (int i = 0; i < polish.size(); i++) {
         if (is_op(polish[i])) {
@@ -251,23 +250,26 @@ int sizer::output_sizing(string fout) {
     ofs << endl;
 
     // output total shape
+    ofs << "width/height: ";
     ofs << final_shapes[polish.size() - 1].first << " "
         << final_shapes[polish.size() - 1].second << endl;
 
     // output total area
+    ofs << "Area: ";
     ofs << final_shapes[polish.size() - 1].first *
                final_shapes[polish.size() - 1].second
         << endl;
 
+    ofs << "x/y/width/height" << endl;
     for (int i = 0; i < polish.size() - 1; i++) {
         if (!is_op(polish[i])) {
+            ofs << polish[i] << ": ";
             ofs << coords[i].first << " " << coords[i].second << " "
                 << final_shapes[i].first << " " << final_shapes[i].second
                 << endl;
         }
     }
 
-    ofs.close();
     return 0;
 }
 

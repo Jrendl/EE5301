@@ -54,4 +54,5 @@ class annealing_engine {
     }
     vector<string> do_annealing();
     vector<string> init_random_polish();
+    int output(string fout);
 };

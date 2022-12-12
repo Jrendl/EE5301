@@ -139,11 +139,11 @@ vector<string> annealing_engine::make_move(vector<string> polish) {
             // generate random int between [0, polish.size()-1)
             // excluding the last value allows us to safely swap the second to
             // last and last
-            int r = rand() % out.size() - 1;
+            int r = rand() % (out.size() - 1);
 
             // find two operands next to each other
             while (is_op(out[r]) || is_op(out[r + 1])) {
-                r = rand() % out.size() - 1;
+                r = rand() % (out.size() - 1);
             }
 
             // swap the position of the two operands
@@ -152,11 +152,12 @@ vector<string> annealing_engine::make_move(vector<string> polish) {
         }
         case 1: {
             // OP2: Complement a series of operators between two operands
-            int r = rand() % out.size() - 1;
+            // we only want to look at 1-n
+            int r = rand() % (out.size() - 1) + 1;
 
             // find the first operator in a group of operators
             while (!(is_op(out[r]) && !is_op(out[r - 1]))) {
-                r = rand() % out.size() - 1;
+                r = rand() % (out.size() - 1) + 1;
             }
 
             // while the value of r is an operator
@@ -177,12 +178,15 @@ vector<string> annealing_engine::make_move(vector<string> polish) {
         case 2: {
             // OP3: Exchange adjacent operance and operator if the resulting
             // expression still a normalized polish exp
-            int r = rand() % out.size() - 1;
 
             do {
+                int r = rand() % (out.size() - 1);
+                // reset if we already made a move
+                out = polish;
                 // find an operator next to an operand
-                while (!(is_op(out[r]) && !is_op(out[r + 1]))) {
-                    r = rand() % out.size() - 1;
+                while (!((is_op(out[r]) && !is_op(out[r + 1])) ||
+                         (!is_op(out[r]) && is_op(out[r + 1])))) {
+                    r = rand() % (out.size() - 1);
                 }
 
                 // swap the operator and operand
@@ -203,11 +207,11 @@ float annealing_engine::wire_length(map<int, pair<float, float>> coords) {
 
     // for each of the hyper edges
     for (auto it = edges->begin(); it != edges->end(); it++) {
-        float min_x = -MAXFLOAT;
-        float max_x = MAXFLOAT;
+        float min_x = MAXFLOAT;
+        float max_x = -MAXFLOAT;
 
-        float min_y = -MAXFLOAT;
-        float max_y = MAXFLOAT;
+        float min_y = MAXFLOAT;
+        float max_y = -MAXFLOAT;
 
         // for each of the nodes in that hyper edge
         for (auto j = (*it).begin(); j != (*it).end(); j++) {
@@ -242,7 +246,31 @@ bool annealing_engine::check_valid_polish(vector<string> polish) {
         } else {
             count++;
         }
+        if (count < 1) {
+            // every sub-string needs to also be valid
+            // therefore, it should never go below 1
+            return false;
+        }
     }
 
     return (count == 1 && no_repeats);
+}
+
+int annealing_engine::output(string fout) {
+    ofstream ofs(fout.c_str());
+
+    if (ofs.is_open() == 0) {
+        cout << "Error opening " << fout << endl;
+        return -1;
+    }
+
+    ofs << "HPWL: ";
+
+    ofs << wire_length(sizing.get_coords()) << endl;
+
+    ofs.close();
+
+    sizing.output_sizing(fout);
+
+    return 0;
 }
