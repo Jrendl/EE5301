@@ -19,6 +19,7 @@ def main():
         with inFile.open('r') as fin:
             data_list = [float(val) for val in fin.readlines()]
         plt.plot(data_list)
+        plt.title("Cost vs Iteration")
         
     else:
         x = []
@@ -29,6 +30,7 @@ def main():
                 y.append(float(line.split(": ")[1]))
         plt.plot(x, y)
         plt.xscale('log')
+        plt.title('Accepted Moves per Temp Step')
     
    
     plt.ion()

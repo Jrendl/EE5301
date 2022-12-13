@@ -11,6 +11,13 @@
     * The sizes are already working so this should be a simple fix
 
 ## Phase 2 ##
+### Execution ###
+* The program can be compiled using the ``make`` command on a Unix system
+* While in the folder in which the project is contained, use the command:
+    * ``./main PA2_Benchmarks/<circuit_file_name>.fp -<arg>``
+* Where ``<circuit_file_name>`` is the name of the circuit you'd like to perform annealing on 
+* And ``<arg>`` is the option: c, a, or w
+
 ### File Descriptions ###
 * ``annealing_engine``: contains the annealing engine itself as well as the constants defined in the header file.
 * ``sizer``: Contains the class that performs sizing on an individual polish expression. Mostly implemented in Phase 1.
@@ -44,6 +51,16 @@
 
 ### Observations ###
 * I used a python script to graph the cost and number of accepted moves per time step. This showed many interesting properties. 
+    * The outputs of a run of n300 with the -c flag can be found in ``cost.txt`` and ``accepted_moves.txt``
+    * The Python script can be run using the following commands:
+        * ``python grapher.py -f a -i accepted_moves.txt`` to show the accepted moves per temp step
+        * ``python grapher.py -i cost.txt`` to show the cost per iteration
+    *The graphs that these output are below
+
+![alt text](Cost_300_c.png "Cost Vs Iteration") 
+![alt text](Accepted_moves_300_c.png "Accepted Moves per Temp Step")
+
+
 * I found that I didn't need to have my initial temperature nearly as high as I had it at first to get good results. I ended up decreasing it from 40000 to 2000
 * I also found that I dind't need to accept nearly as many moves at the beginning, ending up with an 80% acceptance rate
 * My schedule consisted of four segments
