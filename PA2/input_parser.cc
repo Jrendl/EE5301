@@ -4,7 +4,7 @@ int input_parser::parse_file(char *input) {
     char lineBuf[1024];
     ifstream ifs(input);
 
-    if (ifs.is_open() == 0) {  // or we could say if (!ifs)
+    if (ifs.is_open() == 0) {
         cout << "Error opening file " << input << endl;
         return -1;
     }
@@ -24,6 +24,8 @@ int input_parser::parse_file(char *input) {
         // this depends heavily on a correctly formatted file
         istringstream iss(lineStr);
 
+        // line in format: <block> <height> <width>
+
         string block;
         iss >> block;
 
@@ -38,25 +40,28 @@ int input_parser::parse_file(char *input) {
     }
 
     // parse hyper-edges
-    ifs.getline(lineBuf, 1023);  // This line should just be "Nets"
+
+    // This line should just be "Nets", we just throw it out
     ifs.getline(lineBuf, 1023);
 
     // number of hyper-edges
+    ifs.getline(lineBuf, 1023);
     int num_edges = stoi((string)lineBuf);
     edges.resize(num_edges);
 
     // get each of the hyper-edges
     for (int i = 0; i < num_edges; i++) {
+        // configure the line as an istringstream
         ifs.getline(lineBuf, 1023);
         string lineStr(lineBuf);
         istringstream iss(lineStr);
         string curWord;
+
         edges[i] = list<int>();
         while (iss.good()) {
+            // read next word
             iss >> curWord;
-            // if((iss >> curWord) < 1){
-            //     break;
-            // }
+            // add it to the list
             edges[i].push_back(stoi(curWord));
         }
     }

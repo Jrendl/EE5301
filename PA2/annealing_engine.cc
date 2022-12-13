@@ -1,41 +1,24 @@
 #include "annealing_engine.h"
 
 vector<string> annealing_engine::do_annealing() {
-    // logging
-    ofstream cost_out("./cost.txt");
-    ofstream accepted_moves("./accepted_moves.txt");
-
     vector<string> cur_sol = init_random_polish();
 
     K = compute_K(cur_sol);
 
     float T = T_0;
     while (T > T_FREEZE) {
-        // logging
-        int num_accepted = 0;
-
         for (int i = 0; i < NUM_MOVES_PER_TEMP_STEP; i++) {
             vector<string> next_sol = make_move(cur_sol);
 
-            // logging
-            float cur_cost = cost(cur_sol);
-            cost_out << cur_cost << endl;
-
-            float delta_cost = cost(next_sol) - cur_cost;
+            float delta_cost = cost(next_sol) - cost(cur_sol);
             if (accept_move(delta_cost, T)) {
                 cur_sol = next_sol;
-
-                // logging
-                num_accepted++;
             }
         }
 
-        accepted_moves << T << ": " << num_accepted << endl;
         T = cool_down(T);
     }
 
-    cost_out.close();
-    accepted_moves.close();
     return cur_sol;
 }
 
@@ -145,9 +128,8 @@ vector<string> annealing_engine::init_random_polish() {
         sum--;
     }
 
-    // this should be fine cause you only have to do it once
-    // should come up with a valid one eventually?
-    // in theory the first one is valid? but this is a good check
+    // in theory the first one is valid but this is a good check and we only
+    // have to init this once
     if (check_valid_polish(polish)) {
         return polish;
     } else {
@@ -209,6 +191,7 @@ vector<string> annealing_engine::make_move(vector<string> polish) {
             // expression still a normalized polish exp
 
             do {
+                // make a new r
                 int r = rand() % (out.size() - 1);
                 // reset if we already made a move
                 out = polish;
@@ -236,6 +219,7 @@ float annealing_engine::wire_length(map<int, pair<float, float>> coords) {
 
     // for each of the hyper edges
     for (auto it = edges->begin(); it != edges->end(); it++) {
+        // initialize min and maxes to be replaced on the first iteration
         float min_x = MAXFLOAT;
         float max_x = -MAXFLOAT;
 
@@ -254,6 +238,7 @@ float annealing_engine::wire_length(map<int, pair<float, float>> coords) {
         }
 
         // find the half-perimeter of the bounding box of this hyper-edge
+        // add it to our sum
         wire_length_sum += (max_y - min_y) + (max_x - min_x);
     }
 
@@ -262,7 +247,6 @@ float annealing_engine::wire_length(map<int, pair<float, float>> coords) {
 
 bool annealing_engine::check_valid_polish(vector<string> polish) {
     int count = 0;
-    bool no_repeats = true;
     for (auto it = polish.begin(); it != polish.end(); it++) {
         if (is_op(*it)) {
             count--;
@@ -270,7 +254,8 @@ bool annealing_engine::check_valid_polish(vector<string> polish) {
             //  compare this value and the next to make sure they aren't the
             //  same
             if (it != polish.end() - 1 && (*it).compare(*next(it, 1)) == 0) {
-                no_repeats = false;
+                // break early
+                return false;
             }
         } else {
             count++;
@@ -282,7 +267,7 @@ bool annealing_engine::check_valid_polish(vector<string> polish) {
         }
     }
 
-    return (count == 1 && no_repeats);
+    return (count == 1);
 }
 
 int annealing_engine::output(string fout) {

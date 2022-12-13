@@ -54,8 +54,8 @@ pair<vector<pair<int, int>>, vector<pair<int, int>>> sizer::hor_size(
     return pair<vector<pair<int, int>>, vector<pair<int, int>>>(H, ij);
 }
 
-map<int, vector<pair<int, int>>> *sizer::do_sizing(
-    map<int, vector<pair<int, int>>> *sizes, vector<string> polish) {
+int sizer::do_sizing(map<int, vector<pair<int, int>>> *sizes,
+                     vector<string> polish) {
     // clear internal variables
     this->polish = polish;
     sizes_by_loc = map<int, vector<pair<int, int>>>();
@@ -78,6 +78,9 @@ map<int, vector<pair<int, int>>> *sizer::do_sizing(
     }
 
     int err_code = bottom_up_recursive(0);
+    if (err_code == -1) {
+        return -1;
+    }
 
     int head = polish.size() - 1;
 
@@ -97,7 +100,7 @@ map<int, vector<pair<int, int>>> *sizer::do_sizing(
 
     top_down_recursive(head, min_area_space);
 
-    return &sizes_by_loc;
+    return 0;
 }
 
 int sizer::bottom_up_recursive(int start) {
@@ -123,8 +126,6 @@ int sizer::bottom_up_recursive(int start) {
             int direct_child = start;
             while (used_by_parent[direct_child]) {
                 direct_child--;
-                if (direct_child == -1) {
-                }
             }
 
             pair<vector<pair<int, int>>, vector<pair<int, int>>> split_info =
@@ -187,14 +188,18 @@ int sizer::bottom_up_recursive(int start) {
 }
 
 int sizer::top_down_recursive(int node, int shape) {
+    // grab the string at that location
     string n = polish[node];
     // store the final shape
     final_shapes[node] = sizes_by_loc[node][shape];
     if (is_op(n)) {
         // grab ij values
         pair<int, int> ij = ij_pairs[node][shape];
+        // grab the children
         int child_1 = children[node].first;
         int child_2 = children[node].second;
+        // find the children's final dimensions
+        // don't store it yet, we'll do that when we recurse to them
         pair<int, int> child_1_dims = sizes_by_loc[child_1][ij.first];
         pair<int, int> child_2_dims = sizes_by_loc[child_2][ij.second];
 
