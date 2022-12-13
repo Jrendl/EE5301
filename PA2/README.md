@@ -11,6 +11,13 @@
     * The sizes are already working so this should be a simple fix
 
 ## Phase 2 ##
+### File Descriptions ###
+* ``annealing_engine``: contains the annealing engine itself as well as the constants defined in the header file.
+* ``sizer``: Contains the class that performs sizing on an individual polish expression. Mostly implemented in Phase 1.
+* ``input_parser``: Parses the circuit file to extract the shapes and edges.
+*``main.``: Runs the programs in order and accepts inputs from the user.
+
+
 ### Known Issues ###
 * There are no known issues in this version. I have fixed the issues from phase 1 and successfully implemented the annealing engine
 
