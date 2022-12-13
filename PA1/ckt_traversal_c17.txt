@@ -1,0 +1,16 @@
+Circuit delay: 0.0905419 ps
+
+Gate Slacks:
+-n1: 0 ps
+-n2: 0 ps
+-n3: 0 ps
+-n4: 0 ps
+-n5: 0 ps
+OUTPUT-n6: 5.62902e-42 ps
+OUTPUT-n7: 5.62902e-42 ps
+NAND-n8: -0.0167911 ps
+NAND-n9: -0.112832 ps
+NAND-n10: -0.158794 ps
+NAND-n11: -0.126104 ps
+
+Critical Path: 

@@ -1,0 +1,5 @@
+Circuit delay: 0 ps
+
+Gate Slacks:
+
+Critical Path: 
